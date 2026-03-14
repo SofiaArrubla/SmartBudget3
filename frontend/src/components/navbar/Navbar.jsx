@@ -4,13 +4,15 @@ import React from "react";
 import { Link } from "react-router-dom";
 import "./Navbar.css";
 
+
+
 const Navbar = () => {
     return (
         <nav className="navbar">
             {/* Logo que también sirve como enlace a la página de inicio */}
             <div className="navbar-logo">
                 {/* Link "to" recibe la ruta definida en App.jsx */}
-                <Link to="/">MiLogo</Link>
+                <img src="/img/favicon.ico" alt="" />
             </div>
 
             <ul className="navbar-links">

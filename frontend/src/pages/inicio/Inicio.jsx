@@ -4,57 +4,44 @@
 import React from "react";
 import "./Inicio.css";
 
+
 const Inicio = () => {
-    return (
-        <main className="inicio">
+  return (
+    <div className="inicio">
 
-            {/* HERO */}
-            <section className="hero">
-                <h1>Bienvenido a Nuestro Sitio</h1>
-                <p>
-                    Creamos soluciones tecnológicas modernas para empresas y emprendedores.
-                </p>
-                <button>Conocer más</button>
-            </section>
+      {/* HERO */}
+      <section className="hero">
+        <h1>Controla tus finanzas fácilmente</h1>
+        <p>
+          SmartBudget te ayuda a organizar tus gastos, metas y movimientos
+          para que tengas un mejor control de tu dinero.
+        </p>
 
-            {/* SECCIÓN DE SERVICIOS */}
-            <section className="servicios">
+        <button className="hero-btn">Comenzar</button>
+      </section>
 
-                <h2>Nuestros Servicios</h2>
+      {/* CARDS */}
+      <section className="features">
 
-                <div className="servicios-container">
+        <div className="card">
+          <h3>📊 Control de gastos</h3>
+          <p>Registra y visualiza todos tus movimientos financieros.</p>
+        </div>
 
-                    <div className="card">
-                        <h3>Desarrollo Web</h3>
-                        <p>Construimos sitios web modernos y responsivos.</p>
-                    </div>
+        <div className="card">
+          <h3>🎯 Metas financieras</h3>
+          <p>Establece objetivos y monitorea tu progreso.</p>
+        </div>
 
-                    <div className="card">
-                        <h3>Aplicaciones Backend</h3>
-                        <p>Desarrollamos servidores y APIs con Node.js.</p>
-                    </div>
+        <div className="card">
+          <h3>📈 Reportes</h3>
+          <p>Analiza tus finanzas con estadísticas claras.</p>
+        </div>
 
-                    <div className="card">
-                        <h3>Bases de Datos</h3>
-                        <p>Diseño y gestión de bases de datos eficientes.</p>
-                    </div>
+      </section>
 
-                </div>
-
-            </section>
-
-            {/* LLAMADA A LA ACCIÓN */}
-            <section className="cta">
-
-                <h2>¿Tienes un proyecto en mente?</h2>
-                <p>Contáctanos y te ayudaremos a hacerlo realidad.</p>
-
-                <button>Contactar</button>
-
-            </section>
-
-        </main>
-    );
+    </div>
+  );
 };
 
 export default Inicio;
