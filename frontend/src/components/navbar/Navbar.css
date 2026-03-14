@@ -1,0 +1,82 @@
+.navbar{
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:15px 40px;
+background:#0f0f0f;
+position:relative;
+}
+
+/* línea animada */
+
+.navbar::after{
+content:"";
+position:absolute;
+bottom:0;
+left:0;
+width:100%;
+height:3px;
+background:linear-gradient(
+90deg,
+#2e5241,
+#00cc6a,
+#00ff88,
+#00cc6a
+);
+background-size:300% 100%;
+animation: moveLine 4s linear infinite;
+}
+
+/* animación */
+
+@keyframes moveLine{
+0%{
+background-position:0% 0%;
+}
+100%{
+background-position:300% 0%;
+}
+}
+
+.navbar-logo a{
+font-size:20px;
+font-weight:bold;
+color:#00ff88;
+}
+
+/* LINKS */
+
+.navbar-links{
+display:flex;
+gap:25px;
+list-style:none;
+}
+
+.navbar-links a{
+color:#ccc;
+font-size:15px;
+transition:0.3s;
+
+}
+
+.navbar-links a:hover{
+color:#00ff88;
+}
+
+.navbar-links li a {
+    text-decoration: none;
+}
+/* BOTON LOGIN */
+
+.login-btn{
+background:#00ff88;
+color:#000;
+padding:8px 18px;
+border-radius:6px;
+font-weight:bold;
+transition:0.3s;
+}
+
+.login-btn:hover{
+background:#00cc6a;
+}
