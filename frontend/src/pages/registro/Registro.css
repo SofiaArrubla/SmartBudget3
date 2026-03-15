@@ -1,0 +1,91 @@
+.register-container{
+height:100vh;
+display:flex;
+justify-content:center;
+align-items:center;
+background:#0f0f0f;
+}
+
+/* tarjeta */
+
+.register-card{
+background:#1a1a1a;
+padding:40px;
+width:380px;
+border-radius:12px;
+box-shadow:0px 0px 20px rgba(0,255,120,0.2);
+text-align:center;
+}
+
+.register-card h2{
+color:#00ff88;
+margin-bottom:10px;
+}
+
+.register-subtitle{
+color:#aaa;
+margin-bottom:25px;
+}
+
+/* inputs */
+
+.input-group{
+text-align:left;
+margin-bottom:18px;
+}
+
+.input-group label{
+color:#ccc;
+font-size:14px;
+}
+
+.input-group input{
+width:100%;
+padding:10px;
+margin-top:5px;
+border:none;
+border-radius:6px;
+background:#2a2a2a;
+color:white;
+}
+
+.input-group input:focus{
+border:1px solid #00ff88;
+outline:none;
+}
+
+/* botón */
+
+.register-btn{
+width:100%;
+padding:12px;
+background:#00ff88;
+border:none;
+border-radius:6px;
+font-weight:bold;
+cursor:pointer;
+margin-top:10px;
+transition:0.3s;
+}
+
+.register-btn:hover{
+background:#00cc6a;
+}
+
+/* link login */
+
+.login-text{
+margin-top:20px;
+color:#aaa;
+font-size:14px;
+}
+
+.login-link{
+color:#00ff88;
+font-weight:bold;
+text-decoration:none;
+}
+
+.login-link:hover{
+text-decoration:underline;
+}

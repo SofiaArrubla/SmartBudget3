@@ -51,6 +51,30 @@
   border: 1px solid #00ff88;
 }
 
+.login-options{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  font-size: 14px;
+}
+
+.remember{
+  color: #ccc;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.forgot{
+  color: #00ff88;
+  text-decoration: none;
+}
+
+.forgot:hover{
+  text-decoration: underline;
+}
+
 .login-btn {
   width: 100%;
   padding: 12px;
