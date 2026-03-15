@@ -90,3 +90,19 @@
 .login-btn:hover {
   background: #00cc6a;
 }
+
+.registro-text{
+margin-top:20px;
+color:#aaa;
+font-size:14px;
+}
+
+.registro-link{
+color:#00ff88;
+font-weight:bold;
+text-decoration:none;
+}
+
+.registro-link:hover{
+text-decoration:underline;
+}

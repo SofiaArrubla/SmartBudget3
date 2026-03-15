@@ -38,6 +38,13 @@ const Login = () => {
 
         </form>
 
+        <p className="registro-text">
+                  ¿No tienes una cuenta?{" "}
+                  <Link to="/registro" className="registro-link">
+                    Crea una cuenta
+                  </Link>
+                </p>
+
       </div>
 
     </div>
