@@ -1,8 +1,30 @@
-import React from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import "./Registro.css";
 
-const Registro = () => {
+function Registro(){
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const registrarUsuario = async (e) => {
+    e.preventDefault();
+
+    try{
+    const res = await fetch("http://localhost:3000/api/register",{
+      method: "POST",
+      headers:{"Content-Type" : "application/json"},
+      body: JSON.stringify({email, password})
+    });
+
+    const data = await res.json();
+
+    alert(data.message);
+  }catch(error){
+    console.error(error);
+    alert("error al registrar usuario");
+  }
+  };
+
   return (
     <div className="register-container">
 
@@ -13,24 +35,37 @@ const Registro = () => {
           Regístrate para comenzar a usar SmartBudget
         </p>
 
-        <form className="register-form">
+        <form className="register-form" onSubmit={registrarUsuario}>
 
           <div className="input-group">
             <label>Nombre</label>
-            <input type="text" placeholder="Ingresa tu nombre" required />
+            <input 
+            type="text" 
+            placeholder="Ingresa tu nombre"  
+            required />
           </div>
 
           <div className="input-group">
             <label>Correo electrónico</label>
-            <input type="email" placeholder="Ingresa tu correo" required />
+            <input 
+            type="email" 
+            placeholder="Ingresa tu correo" 
+            onChange={(e) =>setEmail(e.target.value)}
+            required />
           </div>
 
           <div className="input-group">
             <label>Contraseña</label>
-            <input type="password" placeholder="Crea una contraseña" required />
+            <input 
+            type="password" 
+            placeholder="Crea una contraseña" 
+            onChange={(e) =>setPassword(e.target.value)}
+            required />
           </div>
 
-          <button className="register-btn">
+          <button className="register-btn"
+          type="submit"
+          >
             Registrarse
           </button>
 
@@ -47,6 +82,6 @@ const Registro = () => {
 
     </div>
   );
-};
+}
 
 export default Registro;
