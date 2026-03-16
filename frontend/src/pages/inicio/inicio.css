@@ -53,7 +53,7 @@ box-shadow: 0 5px 10px rgba(0,0,0,0.2);
 }
 
 .hero-btn::after {
-    content: "";
+    content: "  ";
     display: inline-block;
     height: 100%;
     border-radius: 100px;
