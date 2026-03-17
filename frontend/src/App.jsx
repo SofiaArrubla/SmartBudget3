@@ -11,23 +11,48 @@ import Movimientos from "./pages/movimientos/Movimientos";
 import Registro from "./pages/registro/Registro";
 import Reportes from "./pages/reportes/Reportes";
 
+import PrivateRoute from "./components/PrivateRoute";
 
 function App() {
 return (
-
   <BrowserRouter>
-<Navbar />
-<Routes>
-<Route path="/" element={<Inicio />} />
-<Route path="/login" element={<Login />} />
-<Route path="/configuracion" element={<Configuracion />} />
-<Route path="/espacios" element={<Espacios />} />
-<Route path="/metas" element={<Metas />} />
-<Route path="/movimientos" element={<Movimientos />} />
-<Route path="/registro" element={<Registro />} />
-<Route path="/reportes" element={<Reportes />} />
+  <Navbar />
+  <Routes>
+  <Route path="/" element={<Inicio />} />
+  <Route path="/login" element={<Login />} />
+  <Route path="/registro" element={<Registro />} />
 
-</Routes>
+  <Route path="/movimientos" element={
+    <PrivateRoute>
+    <Movimientos />
+    </PrivateRoute>
+    } />
+
+  <Route path="/metas" element={
+    <PrivateRoute>
+      <Metas />
+    </PrivateRoute>
+    } />
+
+  <Route path="/espacios" element={
+    <PrivateRoute>
+      <Espacios />
+    </PrivateRoute>  
+    } />
+
+  <Route path="/configuracion" element={
+    <PrivateRoute>
+      <Configuracion />
+    </PrivateRoute>
+    } />
+
+  <Route path="/reportes" element={
+    <PrivateRoute>
+      <Reportes />
+    </PrivateRoute>
+    } />
+    
+  </Routes>
   </BrowserRouter>
 
 );
