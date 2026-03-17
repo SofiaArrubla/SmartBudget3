@@ -6,6 +6,21 @@ import "./Inicio.css";
 
 
 const Inicio = () => {
+
+  const obtenerPerfil = async () => {
+  const token = localStorage.getItem("token");
+
+  const res = await fetch("http://localhost:3000/api/profile", {
+    headers: {
+      "Authorization": `Bearer ${token}`
+    }
+  });
+
+  const data = await res.json();
+  console.log(data);
+};
+
+
   return (
     <div className="inicio">
 
@@ -17,7 +32,7 @@ const Inicio = () => {
           para que tengas un mejor control de tu dinero.
         </p>
 
-        <button className="hero-btn">Comenzar</button>
+        <button className="hero-btn" onClick={obtenerPerfil}>Comenzar</button>
       </section>
 
       {/* CARDS */}
