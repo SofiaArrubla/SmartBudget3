@@ -1,12 +1,21 @@
 import React from "react";
 // Link: componente de React Router que reemplaza al <a> tradicional
 // Evita recargas de página y mantiene el historial del navegador
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import "./Navbar.css";
 
 
 
 const Navbar = () => {
+    
+    //Codigo para cerrar sesión (Eliminar token)
+    const navigate = useNavigate();
+    const token = localStorage.getItem("token");
+    const logout = () => {
+        localStorage.removeItem("token");
+        navigate("/login");
+    }
+
     return (
         <nav className="navbar">
             {/* Logo que también sirve como enlace a la página de inicio */}
@@ -29,6 +38,12 @@ const Navbar = () => {
                         Login
                     </Link>
                 </li>
+                {token &&(
+                <li>
+                    <button onClick={logout}>Cerrar sesión</button>
+                </li>
+                )}
+                
             </ul>
 
             </nav>

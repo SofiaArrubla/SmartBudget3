@@ -1,8 +1,7 @@
 import bcrypt from 'bcrypt';
 import {createUser, findUserByEmail} from '../models/userModel.js';
 import jwt from 'jsonwebtoken';
-
-const SECRET = "clave_secreta"
+import {SECRET} from '../config/jwt.js';
 
 export const register = async (req, res) => {
     const {email, password} =  req.body;
@@ -56,7 +55,8 @@ export const login = async (req, res) => {
         );
 
         res.json({
-            message: 'Login exitoso'
+            message: 'Login exitoso',
+            token: token
         });
         
     }catch(error){

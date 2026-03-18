@@ -1,0 +1,1 @@
+export const SECRET = "clave_secreta";
