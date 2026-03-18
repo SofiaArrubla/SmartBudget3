@@ -46,7 +46,6 @@ const Login = () => {
       <div className="login-card">
         <h2>Iniciar Sesión</h2>
         <p className="login-subtitle">Bienvenido a SmartBudget</p>
-
         <form className="login-form" onSubmit={enviarFormulario}>
           
           <div className="input-group">
