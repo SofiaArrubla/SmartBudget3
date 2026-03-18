@@ -26,11 +26,12 @@ const Login = () => {
       if(res.ok){
         //guarda el token
         localStorage.setItem("token", data.token);
+        window.location.href = "/";
 
         alert(data.message);
 
         //Esto redirige después del login
-        navigate("/")
+        navigate("/");
       }else{
         alert(data.message);
       }
