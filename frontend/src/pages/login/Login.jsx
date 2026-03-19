@@ -1,6 +1,7 @@
 import React, {useState} from "react";
 import "./Login.css";
 import { Link, useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
 
 const Login = () => {
 
@@ -26,14 +27,29 @@ const Login = () => {
       if(res.ok){
         //guarda el token
         localStorage.setItem("token", data.token);
+        window.location.href = "/";
 
-        alert(data.message);
+       Swal.fire ({
+        title: "Bienvenido",
+        text: data.message,
+        icon: "sucess",
+        confirmButtonText: "Continuar"
+       }).then(() => {
+        navigate("/");
+       });
+
+      }else{
+        Swal.fire({
+          title:"Error",
+          text: data.message,
+          icon: "error",
+          confirmButtonText:"Intentar de nuevo"
+        });
+      }
 
         //Esto redirige después del login
-        navigate("/")
-      }else{
-        alert(data.message);
-      }
+        navigate("/");
+    
     }catch(error){
       console.error(error);
       alert("Error al inicar sesión")

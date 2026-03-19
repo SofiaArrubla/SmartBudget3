@@ -1,12 +1,21 @@
 .inicio{
-padding:40px;
+height: 100vh;
+  background-image: url('/img/shape.jpg');
+  background-size: contain;
+  background-position: right;
+  background-repeat: no-repeat;
+
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 0 80px;
 
 }
 
 /* HERO */
 
 .hero{
-text-align:center;
+text-align: center;
 margin-top:60px;
 }
 
