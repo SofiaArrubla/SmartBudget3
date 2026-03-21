@@ -9,16 +9,35 @@ const Login = () => {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
-
   // Context API
   const { login } = useAuth();
 
   const enviarFormulario = async (e) => {
     e.preventDefault();
+    if(!email || !password){
+      Swal.fire({
+        title: "Campos incompletos",
+        text: "Todos los campos son obligatorios",
+        icon: "warning"
+      });
+      return;
+    }
+
+    if(!email.includes("@")){
+      Swal.fire({
+        title: "Email invalido",
+        text: "Ingresa un correo válido",
+        icon: "warning"
+      });
+      return;
+    }
 
     try {
+      setLoading(true);
+
       // petición centralizada
       const data = await fetchAPI("/login", {
         method: "POST",
@@ -26,25 +45,29 @@ const Login = () => {
       });
 
       // guardar sesión correctamente
-      login(data.token);
+      login(data.token, data.user);
 
       // feedback UX
       Swal.fire({
         title: "Bienvenido",
         text: data.message,
         icon: "success",
-        confirmButtonText: "Continuar"
-      }).then(() => {
-        navigate("/");
+        timer: 1500,
+        showConfirmButton: false
       });
+
+      setTimeout(() => {
+        navigate("/");
+      }, 1500);
 
     } catch (error) {
       Swal.fire({
         title: "Error",
         text: error.message,
         icon: "error",
-        confirmButtonText: "Intentar de nuevo"
       });
+    }finally{
+      setLoading(false);
     }
   };
 
@@ -62,8 +85,8 @@ const Login = () => {
             <input 
               type="email" 
               placeholder="Ingresa tu correo" 
+              value={email}
               onChange={(e) => setEmail(e.target.value)}
-              required
             />
           </div>
 
@@ -72,8 +95,8 @@ const Login = () => {
             <input 
               type="password" 
               placeholder="Ingresa tu contraseña" 
+              value={password}
               onChange={(e) => setPassword(e.target.value)}
-              required
             />
           </div>
 
@@ -88,7 +111,9 @@ const Login = () => {
             </Link>
           </div>
 
-          <button className="login-btn">Entrar</button>
+          <button className="login-btn" disabled={loading}>
+            {loading ? "cargando..." : "entrar"}
+            </button>
 
         </form>
 

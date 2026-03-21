@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, } from "react-router-dom";
 import "./Registro.css";
 import { fetchAPI } from "../../utils/api";
 import swal from "sweetalert2";
@@ -7,6 +7,7 @@ import swal from "sweetalert2";
 function Registro(){
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [open, setOpen] = useState(false);
 
   const registrarUsuario = async (e) => {
     e.preventDefault();

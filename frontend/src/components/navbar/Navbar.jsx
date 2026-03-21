@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "./Navbar.css";
 import Swal from "sweetalert2";
@@ -7,7 +7,8 @@ import { useAuth } from "../../context/AuthContext";
 const Navbar = () => {
 
 const navigate = useNavigate();
-const { isAuth, logout } = useAuth();
+const { isAuth, logout, user } = useAuth();
+const [open, setOpen] = useState(false);
 
 const handleLogout = () => {
     Swal.fire({
@@ -33,7 +34,6 @@ return (
     </div>
 
     <ul className="navbar-links">
-
         <li><Link to="/">Inicio</Link></li>
 
         {isAuth && (
@@ -54,15 +54,21 @@ return (
         )}
 
         {isAuth && (
-        <li>
-            <button onClick={handleLogout}>
-            Cerrar sesión
-            </button>
+        <li className="user-menu">
+            <span onClick={() => setOpen(!open)}>
+                {user?.email?.split("@")[0]}
+            </span>
+
+            {open &&(
+                <div className="dropdown">
+                    <button onClick={handleLogout}>
+                        Cerrar sesión
+                    </button>
+                </div>
+            )}
         </li>
         )}
-
     </ul>
-
     </nav>
 );
 };
