@@ -1,7 +1,9 @@
-import React, {useState} from "react";
+import React, { useState } from "react";
 import "./Login.css";
 import { Link, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
+import { fetchAPI } from "../../utils/api";
+import { useAuth } from "../../context/AuthContext";
 
 const Login = () => {
 
@@ -10,49 +12,39 @@ const Login = () => {
 
   const navigate = useNavigate();
 
+  // Context API
+  const { login } = useAuth();
+
   const enviarFormulario = async (e) => {
     e.preventDefault();
 
-    try{
-      const res = await fetch("http://localhost:3000/api/login", {
+    try {
+      // petición centralizada
+      const data = await fetchAPI("/login", {
         method: "POST",
-        headers: {
-          "Content-Type" : "application/json"
-        },
-        body: JSON.stringify({email, password})
+        body: JSON.stringify({ email, password })
       });
 
-      const data = await res.json();
+      // guardar sesión correctamente
+      login(data.token);
 
-      if(res.ok){
-        //guarda el token
-        localStorage.setItem("token", data.token);
-        window.location.href = "/";
-
-       Swal.fire ({
+      // feedback UX
+      Swal.fire({
         title: "Bienvenido",
         text: data.message,
-        icon: "sucess",
+        icon: "success",
         confirmButtonText: "Continuar"
-       }).then(() => {
+      }).then(() => {
         navigate("/");
-       });
+      });
 
-      }else{
-        Swal.fire({
-          title:"Error",
-          text: data.message,
-          icon: "error",
-          confirmButtonText:"Intentar de nuevo"
-        });
-      }
-
-        //Esto redirige después del login
-        navigate("/");
-    
-    }catch(error){
-      console.error(error);
-      alert("Error al inicar sesión")
+    } catch (error) {
+      Swal.fire({
+        title: "Error",
+        text: error.message,
+        icon: "error",
+        confirmButtonText: "Intentar de nuevo"
+      });
     }
   };
 
@@ -62,23 +54,26 @@ const Login = () => {
       <div className="login-card">
         <h2>Iniciar Sesión</h2>
         <p className="login-subtitle">Bienvenido a SmartBudget</p>
+
         <form className="login-form" onSubmit={enviarFormulario}>
           
           <div className="input-group">
             <label>Email</label>
             <input 
-            type="email" 
-            placeholder="Ingresa tu correo" 
-            onChange={(e) => setEmail(e.target.value)}
+              type="email" 
+              placeholder="Ingresa tu correo" 
+              onChange={(e) => setEmail(e.target.value)}
+              required
             />
           </div>
 
           <div className="input-group">
             <label>Contraseña</label>
             <input 
-            type="password" 
-            placeholder="Ingresa tu contraseña" 
-            onChange={(e) => setPassword(e.target.value)}
+              type="password" 
+              placeholder="Ingresa tu contraseña" 
+              onChange={(e) => setPassword(e.target.value)}
+              required
             />
           </div>
 
@@ -89,7 +84,7 @@ const Login = () => {
             </label>
 
             <Link to="/recuperar" className="forgot">
-            ¿Olvidaste tu contraseña?
+              ¿Olvidaste tu contraseña?
             </Link>
           </div>
 
@@ -98,11 +93,11 @@ const Login = () => {
         </form>
 
         <p className="registro-text">
-                  ¿No tienes una cuenta?{" "}
-                  <Link to="/registro" className="registro-link">
-                    Crea una cuenta
-                  </Link>
-                </p>
+          ¿No tienes una cuenta?{" "}
+          <Link to="/registro" className="registro-link">
+            Crea una cuenta
+          </Link>
+        </p>
 
       </div>
 

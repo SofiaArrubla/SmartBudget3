@@ -6,6 +6,26 @@ import {SECRET} from '../config/jwt.js';
 export const register = async (req, res) => {
     const {email, password} =  req.body;
 
+    if(!email || !password){
+            return res.status(400).json({
+                message: "Email y contraseña son obligatorios"
+            });
+        }
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+        if(!emailRegex.test(email)){
+            return res.status(400).json({
+                message: "Email inválido"
+            })
+        }
+
+        if(password.length < 6){
+            return res.status(400).json({
+                message: "La contraseña debe tener al menos 6 caracteres"
+            })
+        }
+
     try{
         const userExist = await findUserByEmail (email);
 
@@ -30,12 +50,18 @@ export const register = async (req, res) => {
 export const login = async (req, res) => {
     const {email, password} = req.body;
 
+    if(!email || !password){
+        return res.status(400).json({
+            message:"Email y contraseña son obligatorios"
+        });
+    }
+
     try{
         const user = await findUserByEmail (email);
 
         if(!user){
             return res.status(404).json({
-                message: 'Usuario nno registrado'
+                message: 'Usuario no registrado'
             });
         }
 
