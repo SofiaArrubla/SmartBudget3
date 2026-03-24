@@ -1,58 +1,73 @@
-import React, {useState} from "react";
+import React, { useState } from "react";
 import "./Login.css";
 import { Link, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
+import { fetchAPI } from "../../utils/api";
+import { useAuth } from "../../context/AuthContext";
 
 const Login = () => {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
+  // Context API
+  const { login } = useAuth();
 
   const enviarFormulario = async (e) => {
     e.preventDefault();
+    if(!email || !password){
+      Swal.fire({
+        title: "Campos incompletos",
+        text: "Todos los campos son obligatorios",
+        icon: "warning"
+      });
+      return;
+    }
 
-    try{
-      const res = await fetch("http://localhost:3000/api/login", {
+    if(!email.includes("@")){
+      Swal.fire({
+        title: "Email invalido",
+        text: "Ingresa un correo válido",
+        icon: "warning"
+      });
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      // petición centralizada
+      const data = await fetchAPI("/login", {
         method: "POST",
-        headers: {
-          "Content-Type" : "application/json"
-        },
-        body: JSON.stringify({email, password})
+        body: JSON.stringify({ email, password })
       });
 
-      const data = await res.json();
+      // guardar sesión correctamente
+      login(data.token, data.user);
 
-      if(res.ok){
-        //guarda el token
-        localStorage.setItem("token", data.token);
-        window.location.href = "/";
-
-       Swal.fire ({
+      // feedback UX
+      Swal.fire({
         title: "Bienvenido",
         text: data.message,
-        icon: "sucess",
-        confirmButtonText: "Continuar"
-       }).then(() => {
-        navigate("/");
-       });
+        icon: "success",
+        timer: 1500,
+        showConfirmButton: false
+      });
 
-      }else{
-        Swal.fire({
-          title:"Error",
-          text: data.message,
-          icon: "error",
-          confirmButtonText:"Intentar de nuevo"
-        });
-      }
-
-        //Esto redirige después del login
+      setTimeout(() => {
         navigate("/");
-    
-    }catch(error){
-      console.error(error);
-      alert("Error al inicar sesión")
+      }, 1500);
+
+    } catch (error) {
+      Swal.fire({
+        title: "Error",
+        text: error.message,
+        icon: "error",
+      });
+    }finally{
+      setLoading(false);
     }
   };
 
@@ -62,23 +77,26 @@ const Login = () => {
       <div className="login-card">
         <h2>Iniciar Sesión</h2>
         <p className="login-subtitle">Bienvenido a SmartBudget</p>
+
         <form className="login-form" onSubmit={enviarFormulario}>
           
           <div className="input-group">
             <label>Email</label>
             <input 
-            type="email" 
-            placeholder="Ingresa tu correo" 
-            onChange={(e) => setEmail(e.target.value)}
+              type="email" 
+              placeholder="Ingresa tu correo" 
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
             />
           </div>
 
           <div className="input-group">
             <label>Contraseña</label>
             <input 
-            type="password" 
-            placeholder="Ingresa tu contraseña" 
-            onChange={(e) => setPassword(e.target.value)}
+              type="password" 
+              placeholder="Ingresa tu contraseña" 
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
             />
           </div>
 
@@ -89,20 +107,22 @@ const Login = () => {
             </label>
 
             <Link to="/recuperar" className="forgot">
-            ¿Olvidaste tu contraseña?
+              ¿Olvidaste tu contraseña?
             </Link>
           </div>
 
-          <button className="login-btn">Entrar</button>
+          <button className="login-btn" disabled={loading}>
+            {loading ? "cargando..." : "entrar"}
+            </button>
 
         </form>
 
         <p className="registro-text">
-                  ¿No tienes una cuenta?{" "}
-                  <Link to="/registro" className="registro-link">
-                    Crea una cuenta
-                  </Link>
-                </p>
+          ¿No tienes una cuenta?{" "}
+          <Link to="/registro" className="registro-link">
+            Crea una cuenta
+          </Link>
+        </p>
 
       </div>
 

@@ -80,3 +80,48 @@ transition:0.3s;
 background:#00cc6a;
 }
 
+.user-menu{
+    position: relative;
+    cursor: pointer;
+    margin-left: 15px;
+    display: flex;
+    align-items: center;
+}
+
+.user-menu span{
+    font-weight: bold;
+    padding: 5px 8px;
+    border-radius: 6px;
+    transition: 0.2s;
+}
+
+.user-menu span:hover{
+    background: rgb(255, 255, 255,0.1);
+}
+
+.dropdown{
+    position: absolute;
+    top: 120%;
+    right: 0;
+    background: red;
+    padding: 8px 0;
+    border-radius: 8px;
+    min-width: 140px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+    z-index: 999;
+}
+
+.dropdown button{
+    width: 100%;
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    padding: 10px 15px;
+    text-align: left;
+    transition: 0.2s;
+}
+
+.dropdown button:hover{
+    background: #2a2a2a;
+}

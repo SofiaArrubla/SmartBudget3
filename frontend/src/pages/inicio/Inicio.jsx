@@ -3,22 +3,21 @@
 
 import React from "react";
 import "./Inicio.css";
+import { fetchAPI } from "../../utils/api";
 
 const Inicio = () => {
 
   const obtenerPerfil = async () => {
   const token = localStorage.getItem("token");
 
-  const res = await fetch("http://localhost:3000/api/profile", {
-    headers: {
-      "Authorization": `Bearer ${token}`
-    }
-  });
+  try{
+    const data = await fetchAPI("/profile");
+    console.log(data);
+  }catch(error){
+    console.log(error)
+  }
 
-  const data = await res.json();
-  console.log(data);
-};
-
+  };
 
   return (
     <div className="inicio">
@@ -88,5 +87,4 @@ const Inicio = () => {
     </div>
   );
 };
-
 export default Inicio;

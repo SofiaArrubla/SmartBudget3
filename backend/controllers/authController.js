@@ -7,6 +7,13 @@ export const register = async (req, res) => {
     const {email, password} =  req.body;
 
     try{
+
+        if(!email || !password){
+            return res.status(400).json({
+                message: "Email y contraseña son obligatorios"
+            });
+        }
+
         const userExist = await findUserByEmail (email);
 
         if(userExist){
@@ -18,7 +25,13 @@ export const register = async (req, res) => {
         const hashedPassword = await bcrypt.hash(password,10);
         const newUser = await createUser(email, hashedPassword);
 
-        res.json({message: 'Usuario registrado con éxito'});
+        res.json({
+            message: 'Usuario registrado con éxito',
+            user: {
+                id: newUser.id,
+                email:newUser.email
+            }
+        });
     }catch(error){
         console.error(error);
         res.status(500).json({
@@ -30,12 +43,18 @@ export const register = async (req, res) => {
 export const login = async (req, res) => {
     const {email, password} = req.body;
 
+    if(!email || !password){
+        return res.status(400).json({
+            message:"Email y contraseña son obligatorios"
+        });
+    }
+
     try{
         const user = await findUserByEmail (email);
 
         if(!user){
             return res.status(404).json({
-                message: 'Usuario nno registrado'
+                message: 'Usuario no registrado'
             });
         }
 
@@ -56,7 +75,11 @@ export const login = async (req, res) => {
 
         res.json({
             message: 'Login exitoso',
-            token: token
+            token: token,
+            user: {
+                id: user.id,
+                email: user.email
+            }
         });
         
     }catch(error){

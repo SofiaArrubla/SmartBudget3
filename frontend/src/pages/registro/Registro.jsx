@@ -1,29 +1,37 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, } from "react-router-dom";
 import "./Registro.css";
+import { fetchAPI } from "../../utils/api";
+import swal from "sweetalert2";
 
 function Registro(){
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [open, setOpen] = useState(false);
 
   const registrarUsuario = async (e) => {
     e.preventDefault();
 
     try{
-    const res = await fetch("http://localhost:3000/api/register",{
-      method: "POST",
-      headers:{"Content-Type" : "application/json"},
-      body: JSON.stringify({email, password})
+
+      const data = await fetchAPI("/register", {
+        method: "POST",
+        body: JSON.stringify({email, password})
+      });
+
+      swal.fire({
+        title: "Registro exitoso",
+        text: data.message,
+        icon: "success"
+      });
+    }catch(error){
+    swal.fire({
+      title: "Error",
+      text: error.message,
+      icon: "error"
     });
-
-    const data = await res.json();
-
-    alert(data.message);
-  }catch(error){
-    console.error(error);
-    alert("error al registrar usuario");
   }
-  };
+}
 
   return (
     <div className="register-container">
