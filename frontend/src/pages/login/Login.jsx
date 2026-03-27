@@ -39,7 +39,7 @@ const Login = () => {
       setLoading(true);
 
       // petición centralizada
-      const data = await fetchAPI("/login", {
+      const {data} = await fetchAPI("/login", {
         method: "POST",
         body: JSON.stringify({ email, password })
       });

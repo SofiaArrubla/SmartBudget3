@@ -677,3 +677,36 @@
     flex-direction: column;
   }
 }
+
+/* esto es para darle mas colores oscuros  */
+
+.stat-card {
+  background: #1f1f1f;
+  color: white;
+}
+
+.space-card {
+  background: #1f1f1f;
+  color: white;
+}
+
+.card-title h3 {
+  color: #ffffff;
+}
+
+.stat-info h3 {
+  color: #ffffff;
+}
+
+.stat-info p {
+  color: #aaa;
+}
+
+.progress-bar {
+  background: #333;
+}
+
+.space-card:hover {
+  transform: translateY(-6px) scale(1.01);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+}
