@@ -586,7 +586,7 @@
 }
 
 .add-user-form button:first-of-type {
-  background: #667eea;
+  background: #00ff88;
   color: white;
 }
 
@@ -602,14 +602,14 @@
   border: 1px dashed #ddd;
   border-radius: 6px;
   cursor: pointer;
-  color: #667eea;
+  color: #00ff88;
   font-size: 0.875rem;
   transition: all 0.2s;
 }
 
 .add-user-btn:hover {
   background: #e3f2fd;
-  border-color: #667eea;
+  border-color: #00ff88;
 }
 
 .modal-actions {
