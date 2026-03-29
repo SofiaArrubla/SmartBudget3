@@ -1,4 +1,6 @@
 import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
+import { SECRET } from '../config/jwt.js';
 import {
 createUser,
 findUserByEmail,
@@ -7,17 +9,26 @@ updateEmail,
 updatePassword
 } from '../models/userModel.js';
 
-import jwt from 'jsonwebtoken';
-import { SECRET } from '../config/jwt.js';
-
 export const register = async (req, res) => {
-const { email, password } = req.body;
+const { email, password, nombre } = req.body;
 
 try {
-    if (!email || !password) {
+    if (!email || !password || !nombre) {
     return res.status(400).json({
-        message: "Email y contraseña son obligatorios"
+        message: "Todos los campos son obligatorios"
     });
+    }
+
+    if(password.length < 2){
+        return res.status(400).json({
+            message: "La contraseña debe tener minimo 6 caracteres"
+        });
+    }
+
+    if(nombre.trim().length < 2){
+        return res.status(400).json({
+            message: "Nombre invalido"
+        });
     }
 
     const userExist = await findUserByEmail(email);
@@ -29,7 +40,7 @@ try {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = await createUser(email, hashedPassword);
+    const newUser = await createUser(email, hashedPassword, nombre.trim());
 
     res.json({
     message: 'Usuario registrado con éxito',
@@ -51,13 +62,14 @@ try {
 export const login = async (req, res) => {
 const { email, password } = req.body;
 
-if (!email || !password) {
+try {
+
+    if (!email || !password) {
     return res.status(400).json({
     message: "Email y contraseña son obligatorios"
     });
-}
-
-try {
+    }
+    
     const user = await findUserByEmail(email);
 
     if (!user) {
@@ -91,7 +103,7 @@ try {
     });
 
 } catch (error) {
-    console.error(error);
+    console.error("Error en login:", error);
     res.status(500).json({
     message: 'Error en el servidor'
     });

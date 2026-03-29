@@ -1,12 +1,12 @@
-import pg from 'pg';
+import pg from "pg";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 export const pool = new pg.Pool({
-    connectionString: "postgresql://postgres.uouxetmxrfsooteopawe:Brahyan2000*@aws-1-us-east-1.pooler.supabase.com:6543/postgres?pgbouncer=true",
-    ssl: {
-        rejectUnauthorized: false
-    }
+    connectionString: process.env.DATABASE_URL,
 });
 
-pool.on("connect", () => {
-    console.log("Conectado a PostgresSQL (Supabase)");
+pool.on("connect", () =>{
+    console.log("Conectado a PostgreSQL (Supabase)");
 });
