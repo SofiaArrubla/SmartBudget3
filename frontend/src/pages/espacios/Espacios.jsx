@@ -1,220 +1,212 @@
-import React, { useEffect, useState } from "react";
+import React, {useEffect, useState} from "react";
+import {fetchAPI} from "../../utils/api.js";
+import SpaceCard from "./SpaceCard";
 import "./Espacios.css";
-import { fetchAPI } from "../../utils/api";
 
 const Espacios = () => {
-
   const [spaces, setSpaces] = useState([]);
+  const [loading, setLoading] =  useState(true);
   const [filter, setFilter] = useState("all");
-  const [loading, setLoading] = useState(true);
+  const [showModal, setShowModal] = useState(false);
+  const [form, setForm] = useState({
+    name: "",
+    type: "individual",
+    targetAmount: "",
+    currency: "$",
+    color: "#4CAF50"
+  });
 
-  // estado para mostrar usuarios compartidos (IMPORTANTE: fuera del map)
-  const [openShared, setOpenShared] = useState({});
+  const getSpaces = async () => {
+    try{
+      setLoading(true);
+      const {data} = await fetchAPI("/spaces");
+      setSpaces(data);
+    }catch(error){
+      console.error("Error cargando espacios:",error);
+    }finally{
+      setLoading(false);
+    }
+  };
 
-  // 🔥 traer datos del backend
   useEffect(() => {
-    const getSpaces = async () => {
-      try {
-        const { data } = await fetchAPI("/spaces");
-
-        // normalizar datos del backend
-        const normalized = data.map(space => ({
-          ...space,
-          targetAmount: Number(space.target_amount),
-          currentAmount: Number(space.current_amount),
-          createdAt: space.created_at
-        }));
-
-        setSpaces(normalized);
-      } catch (error) {
-        console.error(error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     getSpaces();
   }, []);
 
-  // 🔥 toggle usuarios compartidos
-  const toggleShared = (id) => {
-    setOpenShared(prev => ({
-      ...prev,
-      [id]: !prev[id]
-    }));
+  const handleChange = (e) => {
+    setForm({
+      ...form,
+      [e.target.name]: e.target.value
+    });
   };
 
-  // 🔥 filtros
+  const handleCreate = async (e) => {
+    e.preventDefault();
+
+    try{
+      await fetchAPI("/spaces", {
+        method: "POST",
+        body: JSON.stringify({
+          ...form,
+          targetAmount: Number(form.targetAmount)
+        })
+      });
+
+      setForm({
+        name: "",
+        type: "individual",
+        targetAmount: "",
+        currency: "$",
+        color: "#4CAF50"
+      });
+
+      setShowModal(false);
+
+      getSpaces();
+    }catch(error){
+      console.error(error);
+      alert("Error al crear espacio");
+    }
+  };
+
   const filteredSpaces = spaces.filter(space => {
-    if (filter === "all") return true;
+    if(filter === "all") return true;
     return space.type === filter;
   });
 
-  // 🔥 stats
   const stats = {
     totalSpaces: spaces.length,
-    totalSaved: spaces.reduce((acc, s) => acc + s.currentAmount, 0),
-    totalTarget: spaces.reduce((acc, s) => acc + s.targetAmount, 0)
+    totalSaved: spaces.reduce((acc, s) => acc + Number(s.currentAmount), 0),
+    totalTarget: spaces.reduce((acc, s) => acc + Number(s.targetAmount), 0)
   };
 
-  if (loading) return <p style={{ color: "white" }}>Cargando...</p>;
+  if(loading){
+      return <p style={{color: "white"}}>Cargando espacios...</p>;
+  }
 
-  return (
+  return(
     <div className="espacios-container">
-
-      {/* HEADER */}
-      <div className="espacios-header">
-        <div>
-          <h1>Mis Espacios de Ahorro</h1>
-          <p>Organiza tus metas financieras</p>
+      <div className="top-section">
+        <div className="header-info">
+          <h1>Espacios</h1>
+          <p>Gestiona tus metas de ahorro</p>
         </div>
 
-        <button className="create-space-btn">
-          + Crear nuevo espacio
+        <button className="create-space-btn"
+        onClick={() => {
+          console.log("Click funcionando")
+          setShowModal(true)}}>
+          + Crear espacio
         </button>
       </div>
 
-      {/* STATS */}
       <div className="stats-cards">
         <div className="stat-card">
-          <div className="stat-icon">💰</div>
-          <div className="stat-info">
-            <h3>{stats.totalSpaces}</h3>
-            <p>Espacios activos</p>
-          </div>
+          <h3>{stats.totalSpaces}</h3>
+          <p>Espacios</p>
         </div>
 
         <div className="stat-card">
-          <div className="stat-icon">🏦</div>
-          <div className="stat-info">
-            <h3>${stats.totalSaved.toLocaleString()}</h3>
-            <p>Total ahorrado</p>
-          </div>
+          <h3>${stats.totalSaved.toLocaleString()}</h3>
+          <p>Ahorrado</p>
         </div>
 
         <div className="stat-card">
-          <div className="stat-icon">🎯</div>
-          <div className="stat-info">
-            <h3>${stats.totalTarget.toLocaleString()}</h3>
-            <p>Meta total</p>
-          </div>
+          <h3>${stats.totalTarget.toLocaleString()}</h3>
+          <p>Meta</p>
         </div>
       </div>
 
-      {/* FILTROS */}
-      <div className="filter-tabs">
-        <button 
-          className={`filter-tab ${filter === "all" ? "active" : ""}`}
-          onClick={() => setFilter("all")}
-        >
-          Todos ({spaces.length})
+      <div className="filters">
+        <button onClick={() => setFilter("all")}
+          className={filter === "all" ? "active" : ""}>
+          Todos
         </button>
 
-        <button 
-          className={`filter-tab ${filter === "individual" ? "active" : ""}`}
-          onClick={() => setFilter("individual")}
-        >
-          Individuales ({spaces.filter(s => s.type === "individual").length})
+        <button onClick={() => setFilter("individual")}
+          className={filter === "individual" ? "active": ""}>
+          Individual
         </button>
 
-        <button 
-          className={`filter-tab ${filter === "shared" ? "active" : ""}`}
-          onClick={() => setFilter("shared")}
-        >
-          Compartidos ({spaces.filter(s => s.type === "shared").length})
+        <button onClick={() => setFilter("shared")}
+          className= {filter === "shared" ? "active": ""}>
+          Compartido
         </button>
       </div>
 
-      {/* CARDS */}
       <div className="spaces-grid">
-        {filteredSpaces.map(space => {
+        {filteredSpaces.map(space =>(
+          <SpaceCard 
+          key={space.id}
+          space={space}
+          onDeleted={getSpaces}
+          />
+        ))}
+        </div>
 
-          const progress = (space.currentAmount / space.targetAmount) * 100;
-          const remaining = space.targetAmount - space.currentAmount;
+        {filteredSpaces.length === 0 &&(
+          <p>No hay espacios</p>
+        )}
 
-          return (
-            <div key={space.id} className="space-card" style={{ borderTopColor: space.color }}>
+      {showModal &&(
+        <div className="modal">
+          <div className="modal-content">
+            <h3>Crear espacio</h3>
+            <form onSubmit={handleCreate}>
 
-              <div className="card-header">
-                <div className="card-title">
-                  <h3>{space.name}</h3>
-                  <span className={`space-type ${space.type}`}>
-                    {space.type === "individual" ? "Individual" : "Compartido"}
-                  </span>
-                </div>
+              <input 
+              type="text"
+              name="name"
+              placeholder="Nombre"
+              value={form.name}
+              onChange={handleChange}
+              required/>
+
+              <select
+              name="type"
+              value={form.type}
+              onChange={handleChange}
+              >
+                <option value="individual">Individual</option>
+                <option value="shared">Compartido</option>
+              </select>
+
+              <input
+              type="number"
+              name="targetAmount"
+              placeholder="Meta"
+              value={form.targetAmount}
+              onChange={handleChange}
+              required
+              />
+
+              <input
+              type="text"
+              name="currency"
+              value={form.currency}
+              onChange={handleChange}
+              />
+
+              <input
+              type="color"
+              name="color"
+              value={form.color}
+              onChange={handleChange}
+              />
+
+              <div style={{marginTop: "10px"}}>
+                <button type="submit">
+                  Crear
+                </button>
+                <button
+                type="button"
+                onClick={() => setShowModal(false)}>
+                  Cancelar
+                </button>
               </div>
-
-              <div className="card-content">
-
-                {/* MONTOS */}
-                <div className="amount-section">
-                  <div className="current-amount">
-                    <label>Monto actual</label>
-                    <span className="amount-value">
-                      {space.currency}{space.currentAmount.toLocaleString()}
-                    </span>
-                  </div>
-
-                  <div className="target-amount">
-                    <label>Meta</label>
-                    <span>
-                      {space.currency}{space.targetAmount.toLocaleString()}
-                    </span>
-                  </div>
-                </div>
-
-                {/* PROGRESO */}
-                <div className="progress-section">
-                  <div className="progress-bar">
-                    <div 
-                      className="progress-fill"
-                      style={{ width: `${Math.min(progress, 100)}%`, backgroundColor: space.color }}
-                    />
-                  </div>
-
-                  <div className="progress-stats">
-                    <span>{progress.toFixed(1)}%</span>
-                    <span>Faltan {space.currency}{remaining.toLocaleString()}</span>
-                  </div>
-                </div>
-
-                {/* COMPARTIDOS */}
-                {space.type === "shared" && (
-                  <div className="shared-section">
-                    <button 
-                      className="shared-toggle"
-                      onClick={() => toggleShared(space.id)}
-                    >
-                      Ver participantes
-                    </button>
-
-                    {openShared[space.id] && (
-                      <div className="shared-users-list">
-                        <p>No implementado aún</p>
-                      </div>
-                    )}
-                  </div>
-                )}
-
-              </div>
-
-              <div className="card-footer">
-                📅 {new Date(space.createdAt).toLocaleDateString()}
-              </div>
-
-            </div>
-          );
-        })}
-      </div>
-
-      {/* VACÍO */}
-      {filteredSpaces.length === 0 && (
-        <div className="empty-state">
-          <h3>No hay espacios</h3>
-          <p>Crea tu primer espacio</p>
+            </form>
+          </div>
         </div>
       )}
-
     </div>
   );
 };
