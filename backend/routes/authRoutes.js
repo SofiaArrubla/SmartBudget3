@@ -1,5 +1,5 @@
 import express from 'express';
-import { login, register } from '../controllers/authController.js';
+import { login, register, getProfile, updateProfile, changeEmail,changePassword } from '../controllers/authController.js';
 import { verifyToken } from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
@@ -7,11 +7,9 @@ const router = express.Router();
 router.post("/login", login);
 router.post("/register", register);
 
-router.get("/profile", verifyToken, (req, res) => {
-    res.json({
-        message: "Ruta protegida",
-        user: req.user
-    });
-});
+router.get("/profile", verifyToken, getProfile);
+router.put("/profile", verifyToken, updateProfile);
+router.put("/email", verifyToken, changeEmail)
+router.put("/password", verifyToken, changePassword);
 
 export default router;
