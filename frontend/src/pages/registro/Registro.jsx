@@ -5,18 +5,62 @@ import { fetchAPI } from "../../utils/api";
 import swal from "sweetalert2";
 
 function Registro(){
+  const [nombre, setNombre] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [open, setOpen] = useState(false);
 
   const registrarUsuario = async (e) => {
     e.preventDefault();
 
-    try{
+    if(!nombre){
+      swal.fire({
+        title: "Nombre invalido",
+        text: "El campo de Nombre no debe de estar vacios",
+        icon: "warning"
+      });
+      return;
+    }
 
-      const data = await fetchAPI("/register", {
+    if(!email){
+      swal.fire({
+        title: "Correo invalido",
+        text: "El campo de Correo no debe de estar vacio",
+        icon: "warning"
+      });
+      return;
+    }
+
+    if(!password){
+      swal.fire({
+        title: "Contraseña invalida",
+        text: "El campo de Contraseña no debe de estar vacio",
+        icon: "warning"
+      });
+      return;
+    }
+
+    if(!email.includes("@")){
+      swal.fire({
+        title: "Email inválido",
+        text: "Ingresar un correo válido",
+        icon: "warning"
+      });
+      return;
+    }
+
+    if(password.length < 6){
+      swal.fire({
+        title: "Contraseña debil",
+        text: "Debe tener minimo 6 caracteres",
+        icon: "warning"
+      });
+      return;
+    }
+
+    try{
+      const {data} = await fetchAPI("/register", {
         method: "POST",
-        body: JSON.stringify({email, password})
+        body: JSON.stringify({nombre, email, password})
       });
 
       swal.fire({
@@ -24,6 +68,11 @@ function Registro(){
         text: data.message,
         icon: "success"
       });
+
+      setNombre("");
+      setEmail("");
+      setPassword("");
+
     }catch(error){
     swal.fire({
       title: "Error",
@@ -31,7 +80,7 @@ function Registro(){
       icon: "error"
     });
   }
-}
+};
 
   return (
     <div className="register-container">
@@ -49,8 +98,10 @@ function Registro(){
             <label>Nombre</label>
             <input 
             type="text" 
-            placeholder="Ingresa tu nombre"  
-            required />
+            placeholder="Ingresa tu nombre"
+            value={nombre}
+            onChange={(e) => setNombre(e.target.value)}
+            />
           </div>
 
           <div className="input-group">
@@ -58,8 +109,9 @@ function Registro(){
             <input 
             type="email" 
             placeholder="Ingresa tu correo" 
+            value={email}
             onChange={(e) =>setEmail(e.target.value)}
-            required />
+            />
           </div>
 
           <div className="input-group">
@@ -67,13 +119,12 @@ function Registro(){
             <input 
             type="password" 
             placeholder="Crea una contraseña" 
+            value={password}
             onChange={(e) =>setPassword(e.target.value)}
-            required />
+            />
           </div>
 
-          <button className="register-btn"
-          type="submit"
-          >
+          <button className="register-btn" type="submit">
             Registrarse
           </button>
 

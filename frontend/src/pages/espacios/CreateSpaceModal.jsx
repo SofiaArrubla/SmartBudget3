@@ -1,0 +1,93 @@
+import React, {useState} from "react";
+import { fetchAPI } from "../../utils/api.js";
+import "./CreateSpaceModal.css";
+
+const CreateSpaceModal = ({onClose, onCreated}) => {
+    const [form, setForm] = useState({
+        name: "",
+        type: "individual",
+        targetAmount: "",
+        currency: "$",
+        color: "#4CAF50"
+    });
+
+    const handleChange = (e) =>{
+        setForm({
+            ...form,
+            [e.target.name]: e.target.value
+        });
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+
+        if(!form.name || !form.targetAmount){
+            alert("Nombre y meta son obligatorios");
+            return;
+        }
+
+        try{
+            await fetchAPI("/spaces", {
+                method: "POST",
+                body: JSON.stringify({
+                    name: form.name,
+                    type: form.type,
+                    targetAmount: Number(form.targetAmount),
+                    currency: form.currency,
+                    color: form.color
+                })
+            });
+
+            onCreated();
+            onClose();
+        }catch(error){
+            console.error(error);
+            alert(error.message || "Error al crear espacio");
+        }
+    };
+
+    return(
+        <div className="overlay">
+            <div className="modal">
+                <h2>Crear Espacio</h2>
+
+                <form onSubmit={handleSubmit}>
+                    <input 
+                    name="name"
+                    placeholder="Nombre"
+                    onChange={handleChange}/>
+
+                <select name="type" value={form.type} onChange={handleChange}>
+                    <option value="individual">Individual</option>
+                    <option value="shared">Compartido</option>
+                </select>
+
+                <input
+                name="targetAmount"
+                type="number"
+                placeholder="Meta"
+                value={form.targetAmount}
+                onChange={handleChange}/>
+
+                <input
+                name="currency"
+                placeholder="Moneda"
+                value={form.currency}
+                onChange={handleChange}/>
+
+                <input name="color"
+                type="color"
+                value={form.color}
+                onChange={handleChange}/>
+
+                <button type="submit" >Crear</button>
+                <button type="button" onClick={onClose}>Cancelar</button>
+
+                </form>
+
+            </div>
+        </div>
+    );
+};
+
+export default CreateSpaceModal;

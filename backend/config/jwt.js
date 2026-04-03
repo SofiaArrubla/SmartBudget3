@@ -1,1 +1,4 @@
-export const SECRET = "clave_secreta";
+import dotenv from "dotenv";
+dotenv.config();
+
+export const SECRET = process.env.JWT_SECRET;

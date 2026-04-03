@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "./Navbar.css";
 import Swal from "sweetalert2";
@@ -9,6 +9,21 @@ const Navbar = () => {
 const navigate = useNavigate();
 const { isAuth, logout, user } = useAuth();
 const [open, setOpen] = useState(false);
+const menuRef = useRef();
+
+useEffect(() => {
+    const handleClickOutside = (Event) => {
+        if(menuRef.current && !menuRef.current.contains(Event.target)){
+            setOpen(false);
+        }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+        document.removeEventListener("mousedown", handleClickOutside);
+    };
+}, []);
 
 const handleLogout = () => {
     Swal.fire({
@@ -20,22 +35,18 @@ const handleLogout = () => {
     cancelButtonText: "Cancelar"
     }).then((result) => {
         if(result.isConfirmed){
-            localStorage.removeItem("token");
-            setIsAuth(false);
+            logout();
             navigate("/login");
         }
-    if (result.isConfirmed) {
-        logout();
-        navigate("/login");
-    }
     });
 };
 
 return (
     <nav className="navbar">
 
-    <div className="navbar-logo">
+    <div className="navbar-logo" onClick={() => navigate("/")}>
         <img src="/img/favicon.ico" alt="logo" />
+        <span>SmartBudget</span>
     </div>
 
     <ul className="navbar-links">
@@ -47,7 +58,6 @@ return (
             <li><Link to="/movimientos">Movimientos</Link></li>
             <li><Link to="/metas">Metas</Link></li>
             <li><Link to="/reportes">Reportes</Link></li>
-            <li><Link to="/configuracion">Configuración</Link></li>
         </>
         )}
 
@@ -59,19 +69,39 @@ return (
         )}
 
         {isAuth && (
-        <li className="user-menu">
-            <span onClick={() => setOpen(!open)}>
-                {user?.email?.split("@")[0]}
-            </span>
+            <div 
+            className="nav-user" 
+            ref={menuRef}
+            >
 
-            {open &&(
-                <div className="dropdown">
-                    <button onClick={handleLogout}>
-                        Cerrar sesión
-                    </button>
+                <div 
+                className="user-info"
+                onClick={(e) => {
+                    e.stopPropagation();
+                    setOpen(!open);
+                }}
+                >
+                    <div className="avatar">
+                        {user?.email.charAt(0).toUpperCase()}
+                    </div>
+
+                    <span>
+                        {user?.email?.split("@")[0]}
+                    </span>
                 </div>
-            )}
-        </li>
+
+                {open &&(
+                    <div className="dropdown">
+                        <button onClick={() => navigate("/configuracion")}>
+                            Configuración
+                        </button>
+
+                        <button onClick={handleLogout} className="logout">
+                            Cerrar sesión
+                        </button>
+                    </div>
+                )}
+            </div>
         )}
     </ul>
     </nav>

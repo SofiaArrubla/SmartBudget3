@@ -17,10 +17,18 @@ const Login = () => {
 
   const enviarFormulario = async (e) => {
     e.preventDefault();
-    if(!email || !password){
+
+    if(!email){
       Swal.fire({
-        title: "Campos incompletos",
-        text: "Todos los campos son obligatorios",
+        title: "Email invalido",
+        text: "El campo de Correo no debe de estar vacio",
+        icon: "warning"
+      })
+    }
+    if(!password){
+      Swal.fire({
+        title: "Contraseña invalida",
+        text: "El campo de Contraseña no debe de estar vacio",
         icon: "warning"
       });
       return;
