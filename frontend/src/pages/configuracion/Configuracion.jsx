@@ -10,84 +10,52 @@ const Configuracion = () => {
     const [password, setPassword] = useState("");
 
     useEffect(() => {
+        let isMounted = true;
+
         const cargarPerfil = async () => {
         try {
             const { data } = await fetchAPI("/profile");
-            setNombre(data?.user?.nombre || "");
+            if(isMounted){
+                setNombre(data?.user?.nombre || "");
+            }
         } catch (error) {
-            Swal.fire(
-            "Error",
-            error.message || "No se pudo cargar el perfil",
-            "error"
-            );
+            if(isMounted){
+                Swal.fire(
+                "Error",
+                error.message || "No se pudo cargar el perfil",
+                "error"
+                );
+            }
         }
         };
 
     cargarPerfil();
+
+    return () => {
+        isMounted = false;
+    };
 }, []);
 
-const actualizarNombre = async () => {
+const handleUpdate = async (endpoint, body, successMsg) => {
     try {
-    const { res, data } = await fetchAPI("/profile", {
+    const { res, data } = await fetchAPI(endpoint, {
         method: "PUT",
-        body: JSON.stringify({ nombre })
+        body: JSON.stringify(body)
     });
 
     if (res.ok) {
-        Swal.fire("Éxito",
-            data.message,
-            "success");
-    }
-    } catch (error) {
-    Swal.fire(
-        "Error",
-        error.message || "No se pudo actualizar el nombre",
-        "error"
-    );
-    }
-};
-
-const cambiarEmail = async () => {
-    try{
-        const {res, data} = await fetchAPI("/email", {
-            method: "PUT",
-            body: JSON.stringify({email})
-        });
-
-        if(res.ok){
-            Swal.fire(
-                "Éxito",
-                data.message,
-                "success"
-            );
-        }
-    }catch(error){
         Swal.fire(
-            "Error",
-            error.message || "No se pudo actualizar el Email",
-            "error"
-        )
+            "Exito",
+            data.message || successMsg,
+            "success"
+        );
+        if(endpoint === "/password") setPassword("");
+        if(endpoint === "/email") setEmail("");
     }
-}
-
-const cambiarPassword = async () => {
-    try {
-    const { res, data } = await fetchAPI("/password", {
-        method: "PUT",
-        body: JSON.stringify({ password })
-    });
-
-    if (res.ok) {
-        Swal.fire("Éxito",
-            data.message,
-            "success");
-        setPassword("");
-    }
-
     } catch (error) {
     Swal.fire(
         "Error",
-        error.message || "No se pudo cambiar la contraseña",
+        error.message || "No se pudo cambiar la acción",
         "error"
     );
     }
@@ -136,7 +104,7 @@ return (
                 placeholder="Nombre"
                 />
 
-                <button onClick={actualizarNombre}>
+                <button onClick={() => handleUpdate ("/profile", {nombre}, "Nombre actualizado")}>
                     Guardar nombre
                 </button>
             </div>
@@ -146,38 +114,41 @@ return (
             <div className="config-card">
                 <h3>Seguridad</h3>
 
+                <label>Correo Electrónico</label>
                 <input
                 type="email"
-                placeholder="Nuevo correo"
+                placeholder="Nuevo correo electrónico"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 />    
 
-                <button onClick={cambiarEmail}>
+                <button onClick={() => handleUpdate ("/email", {email}, "Correo Actualizado")}>
                     Cambiar correo
                 </button>    
 
-                <input
-                type="password"
-                placeholder="Nueva contraseña"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                />
+                <div style={{marginTop: "25px"}}>
+                    <label>Contraseña</label>
+                    <input
+                    type="password"
+                    placeholder="Nueva contraseña"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    />
 
-                <button onClick={cambiarPassword}>
-                    Cambiar contraseña
-                </button>        
+                    <button onClick={() => handleUpdate ("/password", {password}, "Contraseña actualizada")}>
+                        Cambiar contraseña
+                    </button> 
+                </div>       
             </div>
         )}
 
         {active === "preferencias" &&(
             <div className="config-card">
                 <h3>Preferencias</h3>
-
-                <p>Proximamente:</p>
-                <ul>
-                    <li>Moneda por defecto</li>
-                    <li>Modo oscuro/claro</li>
+                <p>Proximamente podrás personalizar:</p>
+                <ul style={{color: "#aaa", marginTop: "10px"}}>
+                    <li>Moneda por defecto (COP, USD, EUR)</li>
+                    <li>Modo claro/oscuro</li>
                     <li>Notificaciones</li>
                 </ul>
             </div>
@@ -186,9 +157,22 @@ return (
         {active === "cuenta" &&(
             <div className="config-card danger">
                 <h3>Zona peligrosa</h3>
-
-                <button className="danger-btn">
-                    Eliminar cuenta
+                <p style={{ fontSize: "0.8rem", marginBottom: "15px", color: "#ff5c5c"}}>
+                    Esta acción es irreversible. Se borrarán todos tus ahorros y espacios.
+                </p>
+                <button className="danger-btn"
+                onClick={() =>{
+                    Swal.fire({
+                        title: "¿Estás seguro?",
+                        text: "No podrás revertir esto",
+                        icon: "warning",
+                        showCancelButton: true,
+                        confirmButtonColor: "#ff5c5c",
+                        cancelButtonColor: "#3085d6",
+                        confirmButtonText: "Sí, eliminar cuenta"
+                    })
+                }}>
+                    Eliminar mi cuenta
                 </button>
             </div>
         )}

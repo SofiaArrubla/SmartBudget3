@@ -86,3 +86,16 @@
 .danger-btn {
     background: #ff5c5c !important;
 }
+
+.config-card input:focus{
+    outline: 1px solid #00ff88;
+    background: #333;
+}
+
+input[type="color"]{
+    padding: 2px;
+    height: 40px;
+    cursor: pointer;
+    border: 2px solid #2c2c2c;
+    background: none;
+}
