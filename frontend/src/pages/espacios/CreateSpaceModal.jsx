@@ -47,8 +47,8 @@ const CreateSpaceModal = ({onClose, onCreated}) => {
     };
 
     return(
-        <div className="overlay">
-            <div className="modal">
+        <div style={overlay}>
+            <div style={modal}>
                 <h2>Crear Espacio</h2>
 
                 <form onSubmit={handleSubmit}>
