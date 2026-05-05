@@ -56,7 +56,6 @@ return (
         <>
             <li><Link to="/espacios">Espacios</Link></li>
             <li><Link to="/movimientos">Movimientos</Link></li>
-            <li><Link to="/metas">Metas</Link></li>
             <li><Link to="/reportes">Reportes</Link></li>
         </>
         )}

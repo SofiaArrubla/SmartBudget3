@@ -1,0 +1,163 @@
+.container {
+    display: flex;
+    height: 100vh;
+    background: #131212;
+}
+
+.main {
+    flex: 1;
+    padding: 20px;
+    background: #131212;
+}
+
+.header {
+   display: flex;
+  justify-content: space-between;
+  align-items: center; 
+  margin-bottom: 20px;
+}
+
+.btn {
+  background: #00ff88
+  ;   
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 8px;
+  cursor: pointer;
+  
+}
+
+.header h3 {
+    font-size: 1.2rem;
+    color: #ffffff;
+    
+}
+
+
+.cards {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.card {
+    flex: 1;
+    padding: 15px;
+    border-radius: 10px;
+    background: #242222;
+}
+
+.ingreso {
+    border-left: 5px solid #00ff88;
+    color: white;
+    
+}
+
+.ingreso h2 {
+    color: #00ff88;
+}
+
+.gastos {
+    border-left: 5px solid rgb(241, 59, 59);
+    color: white;
+}
+
+.gastos h2 {
+    color: rgb(241, 59, 59);
+}
+
+.balance {
+    border-left: 5px solid rgb(98, 98, 250);
+    color: white;
+}
+
+.balance h2 {
+    color: rgb(98, 98, 250);
+}
+
+.filters-container {
+  background: #1a1a1a;
+  padding: 15px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.3);
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.filters select,
+.filters input {
+  background: #262626;
+  color: white;
+  border: 1px solid #333;
+  padding: 10px;
+  border-radius: 8px;
+  outline: none;
+  transition: 0.2s;
+}
+
+.filters select:hover,
+.filters input:hover {
+  border-color: #235347;
+}
+
+.filters select:focus,
+.filters input:focus {
+  border-color: #00ff9d;
+  box-shadow: 0 0 5px rgba(0,255,157,0.5);
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #131212;
+}
+
+.table th, .table td {
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+    color: white;
+}
+
+.gasto-text {
+    color: rgb(180, 52, 52);
+}
+
+.ingreso-text {
+    color: rgb(66, 167, 66);
+}
+
+.edit-btn {
+   background: #00ff88;
+  color: white;
+  border: none;
+  padding: 0.5rem;
+  font-size: 0.80rem;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: transform 0.3s;
+}
+
+.edit-btn:hover {
+  transform: translateY(-2px);
+}
+
+.delete-btn {
+   background: #ff4d4d;
+  color: white;
+  border: none;
+  padding: 0.5rem;
+  font-size: 0.80rem;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: transform 0.3s;
+}
+
+.delete-btn:hover {
+  transform: translateY(-2px);
+}

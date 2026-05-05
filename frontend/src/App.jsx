@@ -6,7 +6,6 @@ import Inicio from "./pages/inicio/Inicio";
 import Login from "./pages/login/Login";
 import Configuracion from "./pages/configuracion/Configuracion";
 import Espacios from "./pages/espacios/Espacios";
-import Metas from "./pages/metas/Metas";
 import Movimientos from "./pages/movimientos/Movimientos";
 import Registro from "./pages/registro/Registro";
 import Reportes from "./pages/reportes/Reportes";
@@ -28,11 +27,6 @@ return (
     </PrivateRoute>
     } />
 
-  <Route path="/metas" element={
-    <PrivateRoute>
-      <Metas />
-    </PrivateRoute>
-    } />
 
   <Route path="/espacios" element={
     <PrivateRoute>

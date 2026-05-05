@@ -1,6 +1,7 @@
-import React, {useEffect, useState} from "react";
+import React, {useEffect, useState, useMemo} from "react";
 import {fetchAPI} from "../../utils/api.js";
 import SpaceCard from "./SpaceCard";
+import Swal from "sweetalert2";
 import "./Espacios.css";
 
 const Espacios = () => {
@@ -23,6 +24,11 @@ const Espacios = () => {
       setSpaces(data);
     }catch(error){
       console.error("Error cargando espacios:",error);
+      Swal.fire(
+        "error",
+        "No se pudieron cargar los espacios",
+        "error"
+      );
     }finally{
       setLoading(false);
     }
@@ -61,26 +67,42 @@ const Espacios = () => {
 
       setShowModal(false);
 
+      await Swal.fire({
+        title: "Exito",
+        text: "Espacio creado correctamente",
+        icon: "success",
+        timer: 1500,
+        showConfirmButton: false
+      });
+
       getSpaces();
     }catch(error){
       console.error(error);
-      alert("Error al crear espacio");
+      Swal.fire(
+        "Error", error.message || "No se pudo crear el espacio", "error"
+      );
     }
   };
 
-  const filteredSpaces = spaces.filter(space => {
-    if(filter === "all") return true;
-    return space.type === filter;
-  });
+  const filteredSpaces = useMemo (() =>{
+    return spaces.filter(space => {
+      if (filter === "all") return true;
+      return space.type === filter;
+    });
+  }, [spaces, filter]);
 
-  const stats = {
+  const stats = useMemo (() =>({
     totalSpaces: spaces.length,
-    totalSaved: spaces.reduce((acc, s) => acc + Number(s.currentAmount), 0),
-    totalTarget: spaces.reduce((acc, s) => acc + Number(s.targetAmount), 0)
-  };
+    totalSaved: spaces.reduce((acc, s) => acc + Number(s.currentAmount || 0), 0),
+    totalTarget: spaces.reduce((acc, s) => acc + Number(s.targetAmount || 0), 0)
+  }), [spaces]);
 
   if(loading){
-      return <p style={{color: "white"}}>Cargando espacios...</p>;
+      return (
+        <div className="espacios-container">
+          <p style={{color: "white", textAlign: "center"}}>Cargando tus metas...</p>
+        </div>
+      );
   }
 
   return(
@@ -144,23 +166,27 @@ const Espacios = () => {
         </div>
 
         {filteredSpaces.length === 0 &&(
-          <p>No hay espacios</p>
+          <p style={{textAlign: "center", marginTop: "20px", color: "#aaa"}}>
+            No se encontraron espacios en esta categoria
+          </p>
         )}
 
       {showModal &&(
         <div className="modal">
           <div className="modal-content">
-            <h3>Crear espacio</h3>
+            <h3>Nuevo Espacio</h3>
             <form onSubmit={handleCreate}>
 
+              <label>Nombre del espacio</label>
               <input 
               type="text"
               name="name"
-              placeholder="Nombre"
+              placeholder="Ej: Viaje a la playa"
               value={form.name}
               onChange={handleChange}
               required/>
 
+              <label>Tipo de ahorro</label>
               <select
               name="type"
               value={form.type}
@@ -170,34 +196,31 @@ const Espacios = () => {
                 <option value="shared">Compartido</option>
               </select>
 
+              <label>Meta de ahorro</label>
               <input
               type="number"
               name="targetAmount"
-              placeholder="Meta"
+              placeholder="Monto meta"
               value={form.targetAmount}
               onChange={handleChange}
               required
               />
 
-              <input
-              type="text"
-              name="currency"
-              value={form.currency}
-              onChange={handleChange}
-              />
-
+              <label>Color de la tarjeta</label>
               <input
               type="color"
               name="color"
               value={form.color}
               onChange={handleChange}
+              style={{height: '40px', padding: '2px'}}
               />
 
-              <div style={{marginTop: "10px"}}>
-                <button type="submit">
+              <div className="modal-actions" style={{marginTop: "20px", display: 'flex', gap: '10px'}}>
+                <button className="create-space-btn" style={{flex: 1}}
+                type="submit">
                   Crear
                 </button>
-                <button
+                <button style={{flex: 1, background: '#333', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer'}}
                 type="button"
                 onClick={() => setShowModal(false)}>
                   Cancelar
