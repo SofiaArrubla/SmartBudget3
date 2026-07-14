@@ -2,7 +2,7 @@ import React, {useState} from "react";
 import { fetchAPI } from "../../utils/api.js";
 import "./CreateSpaceModal.css";
 
-const CreateSpaceModal = ({onClose, onCreated}) => {
+const CreateSpaceModal = ({onClose, onCreated}) => { 
     const [form, setForm] = useState({
         name: "",
         type: "individual",

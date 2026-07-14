@@ -18,8 +18,7 @@
 }
 
 .btn {
-  background: #00ff88
-  ;   
+  background: #00ff88;
   color: white;
   border: none;
   padding: 10px 15px;
@@ -48,10 +47,26 @@
     background: #242222;
 }
 
+.card-icon{
+    width: 50px;
+    height: 50px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 10px;
+
+}
+
 .ingreso {
     border-left: 5px solid #00ff88;
     color: white;
     
+}
+
+.ingreso .card-icon {
+   background: rgba(0,255,136,.12);
+   color: #00ff88;
 }
 
 .ingreso h2 {
@@ -63,6 +78,11 @@
     color: white;
 }
 
+.gastos .card-icon {
+   background: rgba(241, 59, 59,.12);
+   color: rgb(241, 59, 59);
+}
+
 .gastos h2 {
     color: rgb(241, 59, 59);
 }
@@ -70,6 +90,11 @@
 .balance {
     border-left: 5px solid rgb(98, 98, 250);
     color: white;
+}
+
+.balance .card-icon {
+   background: rgba(98, 98, 250,.12);
+   color: rgb(98, 98, 250);
 }
 
 .balance h2 {

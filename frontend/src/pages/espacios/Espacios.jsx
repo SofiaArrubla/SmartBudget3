@@ -109,14 +109,14 @@ const Espacios = () => {
     <div className="espacios-container">
       <div className="top-section">
         <div className="header-info">
-          <h1>Espacios</h1>
+          <h1>Metas</h1>
           <p>Gestiona tus metas de ahorro</p>
         </div>
 
         <button className="create-space-btn"
         onClick={() => {
           console.log("Click funcionando")
-          setShowModal(true)}}>
+          setShowModal(true)}}> 
           + Crear espacio
         </button>
       </div>

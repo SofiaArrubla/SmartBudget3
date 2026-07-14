@@ -45,16 +45,16 @@ return (
     <nav className="navbar">
 
     <div className="navbar-logo" onClick={() => navigate("/")}>
-        <img src="/img/favicon.ico" alt="logo" />
+        <img src="/Logosmart.png" alt="Logo" />
         <span>SmartBudget</span>
     </div>
 
     <ul className="navbar-links">
-        <li><Link to="/">Inicio</Link></li>
+        
 
         {isAuth && (
         <>
-            <li><Link to="/espacios">Espacios</Link></li>
+            <li><Link to="/espacios">Metas</Link></li>
             <li><Link to="/movimientos">Movimientos</Link></li>
             <li><Link to="/reportes">Reportes</Link></li>
         </>
