@@ -26,7 +26,7 @@ export const updateUser = async (id, nombre) => {
 
 export const updateEmail = async (id,email) => {
     const res = await pool.query(
-        'UPDATE users SET email = $1 WHERE id = $2',
+        'UPDATE users SET email = $1 WHERE id = $2 RETURNING id, email, nombre',
         [email, id]
     )
     return res.rows[0];
@@ -34,8 +34,8 @@ export const updateEmail = async (id,email) => {
 
 export const updatePassword = async (id, password) => {
     const res = await pool.query(
-        'UPDATE users SET password = $1 WHERE id = $2',
-        [password, id]
+        'UPDATE users SET password = $1 WHERE id = $2 RETURNING id, email, nombre',
+        [password, id ]
     );
     return res.rows[0];
 };

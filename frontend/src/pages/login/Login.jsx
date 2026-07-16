@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./Login.css";
 import { Link, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
@@ -6,37 +6,44 @@ import { fetchAPI } from "../../utils/api";
 import { useAuth } from "../../context/AuthContext";
 
 const Login = () => {
-
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
-  // Context API
-  const { login } = useAuth();
+  const { login, isAuth } = useAuth();
+
+  // Si ya está autenticado, se envia al inicio
+  useEffect(() => {
+    if (isAuth) {
+      navigate("/");
+    }
+  }, [isAuth, navigate]);
 
   const enviarFormulario = async (e) => {
     e.preventDefault();
 
-    if(!email){
+    if (!email.trim()) {
       Swal.fire({
-        title: "Email invalido",
-        text: "El campo de Correo no debe de estar vacio",
-        icon: "warning"
-      })
-    }
-    if(!password){
-      Swal.fire({
-        title: "Contraseña invalida",
-        text: "El campo de Contraseña no debe de estar vacio",
+        title: "Email inválido",
+        text: "El campo de Correo no debe estar vacío",
         icon: "warning"
       });
       return;
     }
 
-    if(!email.includes("@")){
+    if (!password) {
       Swal.fire({
-        title: "Email invalido",
+        title: "Contraseña inválida",
+        text: "El campo de Contraseña no debe estar vacío",
+        icon: "warning"
+      });
+      return;
+    }
+
+    if (!email.includes("@")) {
+      Swal.fire({
+        title: "Email inválido",
         text: "Ingresa un correo válido",
         icon: "warning"
       });
@@ -46,19 +53,31 @@ const Login = () => {
     try {
       setLoading(true);
 
-      // petición centralizada
-      const {data} = await fetchAPI("/login", {
+      // Petición centralizada
+      const response = await fetchAPI("/login", {
         method: "POST",
-        body: JSON.stringify({ email, password })
+        body: JSON.stringify({ email: email.trim(), password })
       });
 
-      // guardar sesión correctamente
+      // Validamos de forma segura que la respuesta y la propiedad 'data' existan
+      if (!response || !response.data) {
+        throw new Error("No se recibió una respuesta válida del servidor.");
+      }
+
+      const { data } = response;
+
+      // Validamos que el token exista en la respuesta antes de guardarlo
+      if (!data.token) {
+        throw new Error(data.message || "No se recibió un token de acceso válido.");
+      }
+
+      // Guardar sesión correctamente
       login(data.token, data.user);
 
-      // feedback UX
+      // Feedback UX
       Swal.fire({
         title: "Bienvenido",
-        text: data.message,
+        text: data.message || "¡Sesión iniciada con éxito!",
         icon: "success",
         timer: 1500,
         showConfirmButton: false
@@ -69,12 +88,18 @@ const Login = () => {
       }, 1500);
 
     } catch (error) {
+      console.error("Error capturado en Login:", error);
+      
+      // Si el error viene de fetchAPI, tendrá la estructura { status, message }
+      // Si es un error común, usará error.message
+      const mensajeError = error.message || "Credenciales incorrectas o error en el servidor";
+
       Swal.fire({
-        title: "Error",
-        text: error.message,
+        title: "Error de autenticación",
+        text: mensajeError,
         icon: "error",
       });
-    }finally{
+    } finally {
       setLoading(false);
     }
   };
@@ -119,7 +144,7 @@ const Login = () => {
             </Link>
           </div>
 
-          <button className="login-btn" disabled={loading}>
+          <button className="login-btn" type="submit" disabled={loading}>
             {loading ? "cargando..." : "entrar"}
             </button>
 

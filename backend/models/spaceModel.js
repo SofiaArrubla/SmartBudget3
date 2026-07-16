@@ -16,33 +16,46 @@ export const createSpace = async (data, userId) => {
         throw new Error("Monto inválido");
     }
 
-    const result = await pool.query(
-        `INSERT INTO spaces 
-        (name, type, target_amount, currency, color, created_by)
-        VALUES ($1, $2, $3, $4, $5, $6)
-        RETURNING 
-        id,
-        name,
-        type,
-        target_amount AS "targetAmount",
-        current_amount AS "currentAmount",
-        currency,
-        color,
-        created_at AS "createdAt"`,
-        [name, type, targetAmount, currency || "$", color || "#4CAF50", userId]
-    );
+    const client = await pool.connect();
 
-    const space = result.rows[0];
+    try {
+        await client.query('BEGIN');
+
+        const spaceResult = await client.query(
+            `INSERT INTO spaces 
+            (name, type, target_amount, currency, color, created_by)
+            VALUES ($1, $2, $3, $4, $5, $6)
+            RETURNING 
+            id,
+            name,
+            type,
+            target_amount AS "targetAmount",
+            current_amount AS "currentAmount",
+            currency,
+            color,
+            created_at AS "createdAt"`,
+            [name, type, targetAmount, currency || "$", color || "#4CAF50", userId]
+        );
+
+        const space = spaceResult.rows[0];
 
     // RELACIÓN CORRECTA
-    await pool.query(
-        `INSERT INTO space_users (user_id, space_id) 
-        VALUES ($1, $2)`,
-        [userId, space.id]
-    );
+        await client.query(
+            `INSERT INTO space_users (user_id, space_id) 
+            VALUES ($1, $2)`,
+            [userId, space.id]
+        );
 
-    return space;
+        await client.query('COMMIT');
+        return space;
+    } catch (error) {
+        await client.query('ROLLBACK');
+        throw error;
+    } finally {
+        client.release();
+    }
 };
+
 export const getSpaceByUser = async (userId) => {
     const result = await pool.query(
         `SELECT
@@ -71,7 +84,11 @@ export const  deleteSpace = async (spaceId, userId) => {
     );
 
     if(check.rows.length === 0){
-        throw new Error("No autorizado");
+        throw new Error("Espacio no encontrado");
+    }
+
+    if(check.rows[0].created_by !== userId){
+        throw new Error("No autorizado. Solo el creador del espacio puede eliminarlo.");
     }
 
     await pool.query(

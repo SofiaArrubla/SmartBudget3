@@ -1,39 +1,28 @@
 const API_URL = "http://localhost:3000/api";
 
 export const fetchAPI = async (endpoint, options = {}) => {
-    try {
-        const token = localStorage.getItem("token");
+    const token = localStorage.getItem("token");
 
-        const res = await fetch(`${API_URL}${endpoint}`, {
-            ...options,
-            headers: {
-                "Content-Type": "application/json",
-                ...options.headers,
-                ...(token && { Authorization: `Bearer ${token}` })
-            }
-        });
+    const headers = {
+        "Content-Type": "application/json",
+        ...(token ? { "Authorization": `Bearer ${token}` } : {}),
+        ...options.headers,
+    };
 
-        const contentType = res.headers.get("content-type");
+    const config = {
+        ...options,
+        headers,
+    };
 
-        let data;
+    const response = await fetch(`${API_URL}${endpoint}`, config);
 
-        if (contentType && contentType.includes("application/json")) {
-            data = await res.json();
-        } else {
-            data = { message: "Respuesta no válida del servidor" };
-        }
-
-        // Manejo global de errores
-        if (!res.ok) {
-            throw {
-                status: res.status,
-                message: data.message || "Error en la petición"
-            };
-        }
-
-        return { res, data };
-
-    } catch (error) {
-        throw error;
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || `Error en el servidor: ${response.status}`);
     }
+
+    const data = await response.json().catch(() => ({}));
+    
+    // Devolvemos el envoltorio { data, res } para que la desestructuración de React funcione.
+    return { data, res: response }; 
 };

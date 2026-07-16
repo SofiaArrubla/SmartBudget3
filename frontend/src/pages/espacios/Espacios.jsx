@@ -7,6 +7,7 @@ import "./Espacios.css";
 const Espacios = () => {
   const [spaces, setSpaces] = useState([]);
   const [loading, setLoading] =  useState(true);
+  const [creating, setCreating] = useState(false);
   const [filter, setFilter] = useState("all");
   const [showModal, setShowModal] = useState(false);
   const [form, setForm] = useState({
@@ -38,6 +39,16 @@ const Espacios = () => {
     getSpaces();
   }, []);
 
+  useEffect(() => {
+    const handlekeyDown = (e) => {
+      if(e.key === "Escape") setShowModal(false);
+    };
+    if(showModal){
+      window.addEventListener("keydown", handlekeyDown);
+    }
+    return () => window.removeEventListener("keydown", handlekeyDown);
+  }, [showModal]);
+
   const handleChange = (e) => {
     setForm({
       ...form,
@@ -48,12 +59,26 @@ const Espacios = () => {
   const handleCreate = async (e) => {
     e.preventDefault();
 
+    const amount = Number(form.targetAmount);
+
+    if(!form.name.trim()){
+      Swal.fire("Nombre inválido", "El espacio de ahorro necesita un nombre", "warning");
+      return;
+    }
+
+    if(isNaN(amount) || amount <= 0){
+      Swal.fire("Monto inválido", "La meta de ahorro debe ser un número mayor a 0", "warning");
+      return;
+    }
+
     try{
+      setCreating(true);
       await fetchAPI("/spaces", {
         method: "POST",
         body: JSON.stringify({
           ...form,
-          targetAmount: Number(form.targetAmount)
+          name: form.name.trim(),
+          targetAmount: amount
         })
       });
 
@@ -78,9 +103,13 @@ const Espacios = () => {
       getSpaces();
     }catch(error){
       console.error(error);
-      Swal.fire(
-        "Error", error.message || "No se pudo crear el espacio", "error"
-      );
+      Swal.fire({
+        title: "Error",
+        text: error.message || "No se pudo crear el espacio de ahorro",
+        icon: "error"
+      });
+    }finally{
+      setCreating(false);
     }
   };
 
@@ -100,7 +129,7 @@ const Espacios = () => {
   if(loading){
       return (
         <div className="espacios-container">
-          <p style={{color: "white", textAlign: "center"}}>Cargando tus metas...</p>
+          <p style={{color: "white", textAlign: "center", marginTop: "40px"}}>Cargando tus metas...</p>
         </div>
       );
   }
@@ -113,10 +142,7 @@ const Espacios = () => {
           <p>Gestiona tus metas de ahorro</p>
         </div>
 
-        <button className="create-space-btn"
-        onClick={() => {
-          console.log("Click funcionando")
-          setShowModal(true)}}> 
+        <button className="create-space-btn" onClick={() => setShowModal(true)}> 
           + Crear espacio
         </button>
       </div>
@@ -134,23 +160,20 @@ const Espacios = () => {
 
         <div className="stat-card">
           <h3>${stats.totalTarget.toLocaleString()}</h3>
-          <p>Meta</p>
+          <p>Meta total</p>
         </div>
       </div>
 
       <div className="filters">
-        <button onClick={() => setFilter("all")}
-          className={filter === "all" ? "active" : ""}>
+        <button onClick={() => setFilter("all")} className={filter === "all" ? "active" : ""}>
           Todos
         </button>
 
-        <button onClick={() => setFilter("individual")}
-          className={filter === "individual" ? "active": ""}>
+        <button onClick={() => setFilter("individual")} className={filter === "individual" ? "active": ""}>
           Individual
         </button>
 
-        <button onClick={() => setFilter("shared")}
-          className= {filter === "shared" ? "active": ""}>
+        <button onClick={() => setFilter("shared")} className= {filter === "shared" ? "active": ""}>
           Compartido
         </button>
       </div>
@@ -166,14 +189,14 @@ const Espacios = () => {
         </div>
 
         {filteredSpaces.length === 0 &&(
-          <p style={{textAlign: "center", marginTop: "20px", color: "#aaa"}}>
+          <p style={{textAlign: "center", marginTop: "40px", color: "#aaa"}}>
             No se encontraron espacios en esta categoria
           </p>
         )}
 
       {showModal &&(
-        <div className="modal">
-          <div className="modal-content">
+        <div className="modal" onClick={(e) => setShowModal(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <h3>Nuevo Espacio</h3>
             <form onSubmit={handleCreate}>
 
@@ -184,14 +207,12 @@ const Espacios = () => {
               placeholder="Ej: Viaje a la playa"
               value={form.name}
               onChange={handleChange}
-              required/>
+              maxLength={40}
+              required
+              />
 
               <label>Tipo de ahorro</label>
-              <select
-              name="type"
-              value={form.type}
-              onChange={handleChange}
-              >
+              <select name="type" value={form.type} onChange={handleChange}>
                 <option value="individual">Individual</option>
                 <option value="shared">Compartido</option>
               </select>
@@ -200,9 +221,10 @@ const Espacios = () => {
               <input
               type="number"
               name="targetAmount"
-              placeholder="Monto meta"
+              placeholder="Monto de la meta"
               value={form.targetAmount}
               onChange={handleChange}
+              min="1"
               required
               />
 
@@ -212,13 +234,12 @@ const Espacios = () => {
               name="color"
               value={form.color}
               onChange={handleChange}
-              style={{height: '40px', padding: '2px'}}
+              style={{height: '40px', padding: '2px', cursor: 'pointer'}}
               />
 
               <div className="modal-actions" style={{marginTop: "20px", display: 'flex', gap: '10px'}}>
-                <button className="create-space-btn" style={{flex: 1}}
-                type="submit">
-                  Crear
+                <button className="create-space-btn" style={{flex: 1}} type="submit" disabled={creating}>
+                  {creating ? "Creando..." : "Crear"}
                 </button>
                 <button style={{flex: 1, background: '#333', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer'}}
                 type="button"
