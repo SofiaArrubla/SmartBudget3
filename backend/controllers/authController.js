@@ -19,7 +19,7 @@ try {
     });
     }
 
-    if(password.length < 2){
+    if(password.length < 6){
         return res.status(400).json({
             message: "La contraseña debe tener minimo 6 caracteres"
         });

@@ -1,18 +1,29 @@
-import { useState } from "react";
-import { Link, } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import "./Registro.css";
 import { fetchAPI } from "../../utils/api";
+import { useAuth } from "../../context/AuthContext";
 import swal from "sweetalert2";
 
 function Registro(){
   const [nombre, setNombre] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const navigate = useNavigate();
+  const {isAuth} = useAuth();
+
+  useEffect(() => {
+    if (isAuth) {
+      navigate("/");
+    }
+  }, [isAuth, navigate]);
 
   const registrarUsuario = async (e) => {
     e.preventDefault();
 
-    if(!nombre){
+    if(!nombre.trim()){
       swal.fire({
         title: "Nombre invalido",
         text: "El campo de Nombre no debe de estar vacios",
@@ -21,7 +32,7 @@ function Registro(){
       return;
     }
 
-    if(!email){
+    if(!email.trim()){
       swal.fire({
         title: "Correo invalido",
         text: "El campo de Correo no debe de estar vacio",
@@ -58,14 +69,19 @@ function Registro(){
     }
 
     try{
+      setLoading(true);
       const {data} = await fetchAPI("/register", {
         method: "POST",
-        body: JSON.stringify({nombre, email, password})
+        body: JSON.stringify({
+          nombre: nombre.trim(),
+          email: email.trim(),
+          password
+        })
       });
 
       swal.fire({
         title: "Registro exitoso",
-        text: data.message,
+        text: data.message || "Usuario registrado correctamente, ahora puedes iniciar sesión",
         icon: "success"
       });
 
@@ -73,12 +89,16 @@ function Registro(){
       setEmail("");
       setPassword("");
 
+      navigate("/login");
+
     }catch(error){
     swal.fire({
       title: "Error",
-      text: error.message,
+      text: error.message || "No se pudo registrar la cuenta",
       icon: "error"
     });
+    }finally{
+      setLoading(false);
   }
 };
 
@@ -124,8 +144,8 @@ function Registro(){
             />
           </div>
 
-          <button className="register-btn" type="submit">
-            Registrarse
+          <button className="register-btn" type="submit" disabled={loading}>
+            {loading ? "Registrando..." : "Registrarse"}
           </button>
 
         </form>

@@ -1,55 +1,53 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { Wallet, CreditCard, TrendingUp } from "lucide-react";
 import "./Movimientos.css";
 import CreateMovementModal from "../movimientos/CreateMovementModal";
+import { fetchAPI } from "../../utils/api.js";
+import Swal from "sweetalert2";
 
 const Movimientos = () => {
   const [showModal, setShowModal] = useState(false);
-  const [movimientos, setMovimientos] = useState([ //ejenplos de movimientos
-    {
-      id: 1,
-      type: "gasto",
-      amount: 0,
-      category: "Comida",
-      paymentMethod: "Efectivo",
-      date: "2023-10-01",
-      description: "Compra en el supermercado",
-    },
-    {
-      id: 2,
-      type: "ingreso",
-      amount: 0,
-      category: "Salario",
-      paymentMethod: "Transferencia",
-      date: "2023-10-01",
-      description: "Nómina",
-    },
-  ]);
+  const [movimientos, setMovimientos] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [editingMovement, setEditingMovement] = useState(null);
 
-  const [totales, setTotales] = useState({
-    ingresos: 0,
-    gastos: 0,
-    balance: 0,
-  });
+  const getMovimientos = async () => {
+    try {
+      setLoading(true);
+      const { data } = await fetchAPI("/movements");
+      setMovimientos(data || []);
+    } catch (error) {
+      console.error("Error al cargar movimientos:", error);
+      Swal.fire({
+        title: "Error",
+        text: "No se pudieron obtener tus transacciones de este mes.",
+        icon: "error"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  // Calcular totales cada vez que cambien los movimientos
   useEffect(() => {
+    getMovimientos();
+  }, []);
+
+  const totales = useMemo(() => {
     const ingresos = movimientos
-      .filter((m) => m.type === "ingreso")
-      .reduce((sum, m) => sum + m.amount, 0);
+      .filter((m) => m.type === "ingreso" || m.type === "income")
+      .reduce((sum, m) => sum + Number(m.amount || 0), 0);
 
     const gastos = movimientos
-      .filter((m) => m.type === "gasto")
-      .reduce((sum, m) => sum + m.amount, 0);
+      .filter((m) => m.type === "gasto" || m.type === "expense")
+      .reduce((sum, m) => sum + Number(m.amount || 0), 0);
 
-    setTotales({
+    return {
       ingresos,
       gastos,
       balance: ingresos - gastos,
-    });
+    };
   }, [movimientos]);
 
-  // Formatear número a moneda
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat("es-CO", {
       style: "currency",
@@ -59,39 +57,77 @@ const Movimientos = () => {
     }).format(amount);
   };
 
-  // Crear nuevo movimiento
-  const handleCreateMovement = (newMovement) => {
-    const movementWithId = {
-      ...newMovement,
-      id: Date.now(), // ID único basado en timestamp
-      amount: Number(newMovement.amount),
-    };
-    setMovimientos([movementWithId, ...movimientos]);
+  const handleSuccess = () => {
+    setShowModal(false);
+    setEditingMovement(null);
+    getMovimientos();
   };
 
-  // Editar movimiento
-  const handleEdit = (id) => {
-    const movimiento = movimientos.find((m) => m.id === id);
-    if (movimiento) {
-      // Formulario de edición, solo se muestra un alert por ahora
-      console.log("Editar movimiento:", movimiento);
-      alert(`Editando movimiento: ${movimiento.description}`);
-    }
+  const handleEdit = (movimiento) => {
+    setEditingMovement(movimiento);
+    setShowModal(true);
   };
 
-  // Borrar movimiento
   const handleDelete = (id) => {
-    if (window.confirm("¿Estás seguro de eliminar este movimiento?")) {
-      setMovimientos(movimientos.filter((m) => m.id !== id));
-    }
+    Swal.fire({
+      title: "¿Estás seguro?",
+      text: "Esta acción no se puede deshacer y afectará tu balance global.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Sí, eliminar",
+      cancelButtonText: "Cancelar"
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          await fetchAPI(`/movements/${id}`, {
+            method: "DELETE"
+          });
+          
+          Swal.fire({
+            title: "Eliminado",
+            text: "El movimiento ha sido borrado con éxito.",
+            icon: "success",
+            timer: 1500,
+            showConfirmButton: false
+          });
+          
+          getMovimientos();
+        } catch (error) {
+          console.error("Error al borrar:", error);
+          Swal.fire({
+            title: "Error",
+            text: error.message || "No se pudo eliminar el registro",
+            icon: "error"
+          });
+        }
+      }
+    });
   };
+
+  if (loading) {
+    return (
+      <div className="container">
+        <p style={{ color: "white", textAlign: "center", marginTop: "40px" }}>
+          Sincronizando tus finanzas...
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="container">
       <main className="main">
         <header className="header">
           <h3>Movimientos</h3>
-          <button className="btn" onClick={() => setShowModal(true)}>
+          <button 
+            className="btn" 
+            onClick={() => {
+              setEditingMovement(null);
+              setShowModal(true);
+            }}
+          >
             + Nuevo movimiento
           </button>
         </header>
@@ -118,7 +154,9 @@ const Movimientos = () => {
               <TrendingUp size={28} />
             </div>
             <p>Balance del mes</p>
-            <h2>{formatCurrency(totales.balance)}</h2>
+            <h2 style={{ color: totales.balance < 0 ? "#ff4d4d" : "inherit" }}>
+              {formatCurrency(totales.balance)}
+            </h2>
           </div>
         </div>
 
@@ -131,7 +169,7 @@ const Movimientos = () => {
               <th>Método</th>
               <th>Fecha</th>
               <th>Descripción</th>
-              <th></th>
+              <th>Acciones</th>
             </tr>
           </thead>
 
@@ -147,31 +185,40 @@ const Movimientos = () => {
                 <tr key={movimiento.id}>
                   <td
                     className={
-                      movimiento.type === "ingreso"
+                      movimiento.type === "ingreso" || movimiento.type === "income"
                         ? "ingreso-text"
                         : "gasto-text"
                     }
                   >
-                    {movimiento.type === "ingreso" ? "Ingreso" : "Gasto"}
+                    {movimiento.type === "ingreso" || movimiento.type === "income" ? "Ingreso" : "Gasto"}
                   </td>
                   <td>{formatCurrency(movimiento.amount)}</td>
                   <td>{movimiento.category}</td>
-                  <td>{movimiento.paymentMethod}</td>
-                  <td>{movimiento.date}</td>
-                  <td>{movimiento.description}</td>
+                  <td>{movimiento.paymentMethod || movimiento.payment_method || "No especificado"}</td>
                   <td>
-                    <button
-                      className="edit-btn"
-                      onClick={() => handleEdit(movimiento.id)}
-                    >
-                      Editar
-                    </button>
-                    <button
-                      className="delete-btn"
-                      onClick={() => handleDelete(movimiento.id)}
-                    >
-                      Borrar
-                    </button>
+                    {movimiento.date 
+                      ? new Date(movimiento.date).toLocaleDateString("es-CO") 
+                      : movimiento.created_at 
+                      ? new Date(movimiento.created_at).toLocaleDateString("es-CO") 
+                      : "S/F"
+                    }
+                  </td>
+                  <td>{movimiento.description || "Sin descripción"}</td>
+                  <td>
+                    <div className="action-buttons" style={{ display: "flex", gap: "8px" }}>
+                      <button
+                        className="edit-btn"
+                        onClick={() => handleEdit(movimiento)}
+                      >
+                        Editar
+                      </button>
+                      <button
+                        className="delete-btn"
+                        onClick={() => handleDelete(movimiento.id)}
+                      >
+                        Borrar
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))
@@ -179,11 +226,14 @@ const Movimientos = () => {
           </tbody>
         </table>
 
-        {/* MODAL */}
         {showModal && (
           <CreateMovementModal
-            onClose={() => setShowModal(false)}
-            onCreated={handleCreateMovement}
+            onClose={() => {
+              setShowModal(false);
+              setEditingMovement(null);
+            }}
+            onSuccess={handleSuccess}
+            editingMovement={editingMovement}
           />
         )}
       </main>

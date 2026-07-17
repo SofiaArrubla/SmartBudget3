@@ -1,15 +1,36 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { fetchAPI } from "../../utils/api.js";
+import Swal from "sweetalert2";
 import "./CreateMovementModal.css";
 
-const CreateMovementModal = ({ onClose, onCreated }) => {
+const CreateMovementModal = ({ onClose, onSuccess, editingMovement }) => {
+  const [spaces, setSpaces] = useState([]);
   const [form, setForm] = useState({
-    type: "gasto",
+    spaceId: "",
+    type: "expense",
     amount: "",
     category: "",
-    paymentMethod: "",
-    date: "",
     description: "",
   });
+
+  const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    // Cargar los espacios disponibles para que el usuario pueda asignar el movimiento
+    fetchAPI("/spaces")
+      .then(res => setSpaces(res.data || []))
+      .catch(err => console.error("Error cargando espacios", err));
+
+    if (editingMovement) {
+      setForm({
+        spaceId: editingMovement.spaceId || "",
+        type: editingMovement.type || "expense",
+        amount: editingMovement.amount || "",
+        category: editingMovement.category || "",
+        description: editingMovement.description || "",
+      });
+    }
+  }, [editingMovement]);
 
   const handleChange = (e) => {
     setForm({
@@ -18,90 +39,81 @@ const CreateMovementModal = ({ onClose, onCreated }) => {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validaciones
-    if (!form.amount || form.amount <= 0) {
-      alert("Por favor ingresa un monto válido");
-      return;
+    if (!form.spaceId) {
+      return Swal.fire({ icon: "warning", title: "Falta el espacio", text: "Selecciona una meta/espacio." });
     }
-
+    if (!form.amount || Number(form.amount) <= 0) {
+      return Swal.fire({ icon: "warning", title: "Monto inválido", text: "Ingresa un monto válido mayor a 0." });
+    }
     if (!form.category) {
-      alert("Por favor selecciona una categoría");
-      return;
+      return Swal.fire({ icon: "warning", title: "Falta categoría", text: "Selecciona una categoría." });
     }
 
-    if (!form.paymentMethod) {
-      alert("Por favor selecciona un método de pago");
-      return;
+    try {
+      setSubmitting(true);
+
+      const payload = {
+        ...form,
+        spaceId: Number(form.spaceId),
+        amount: Number(form.amount),
+      };
+
+      if (editingMovement) {
+        await fetchAPI(`/movements/${editingMovement.id}`, {
+          method: "PUT",
+          body: JSON.stringify(payload),
+        });
+        Swal.fire({ icon: "success", title: "¡Actualizado!", text: "Movimiento modificado.", timer: 1500, showConfirmButton: false });
+      } else {
+        await fetchAPI("/movements", {
+          method: "POST",
+          body: JSON.stringify(payload),
+        });
+        Swal.fire({ icon: "success", title: "¡Guardado!", text: "Nuevo movimiento registrado.", timer: 1500, showConfirmButton: false });
+      }
+
+      onSuccess();
+    } catch (error) {
+      Swal.fire({ icon: "error", title: "Error", text: error.message || "Error al procesar el movimiento." });
+    } finally {
+      setSubmitting(false);
     }
-
-    if (!form.date) {
-      alert("Por favor selecciona una fecha");
-      return;
-    }
-
-    // Crear el movimiento
-    onCreated({
-      ...form,
-      amount: Number(form.amount),
-    });
-
-    // Resetear formulario (opcional)
-    setForm({
-      type: "gasto",
-      amount: "",
-      category: "",
-      paymentMethod: "",
-      date: "",
-      description: "",
-    });
   };
 
   return (
     <div className="overlay" onClick={onClose}>
       <div className="modal" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
-          <h2>Nuevo movimiento</h2>
-          <button className="close-btn" onClick={onClose}>
-            ✕
-          </button>
+          <h2>{editingMovement ? "Editar movimiento" : "Nuevo movimiento"}</h2>
+          <button className="close-btn" onClick={onClose} disabled={submitting}>✕</button>
         </div>
 
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <select
-              name="type"
-              value={form.type}
-              onChange={handleChange}
-              className="form-select"
-            >
-              <option value="ingreso">Ingreso</option>
-              <option value="gasto">Gasto</option>
+            <select name="spaceId" value={form.spaceId} onChange={handleChange} className="form-select" disabled={submitting || editingMovement}>
+              <option value="">Selecciona una Meta / Espacio</option>
+              {spaces.map(space => (
+                <option key={space.id} value={space.id}>{space.name}</option>
+              ))}
             </select>
           </div>
 
           <div className="form-group">
-            <input
-              name="amount"
-              type="number"
-              placeholder="Monto"
-              value={form.amount}
-              onChange={handleChange}
-              className="form-input"
-              step="0.01"
-              min="0"
-            />
+            <select name="type" value={form.type} onChange={handleChange} className="form-select" disabled={submitting}>
+              <option value="income">Ingreso</option>
+              <option value="expense">Gasto</option>
+            </select>
           </div>
 
           <div className="form-group">
-            <select
-              name="category"
-              value={form.category}
-              onChange={handleChange}
-              className="form-select"
-            >
+            <input name="amount" type="number" placeholder="Monto" value={form.amount} onChange={handleChange} className="form-input" step="0.01" min="0" disabled={submitting} />
+          </div>
+
+          <div className="form-group">
+            <select name="category" value={form.category} onChange={handleChange} className="form-select" disabled={submitting}>
               <option value="">Categoría</option>
               <option value="Comida">Comida</option>
               <option value="Transporte">Transporte</option>
@@ -113,48 +125,12 @@ const CreateMovementModal = ({ onClose, onCreated }) => {
           </div>
 
           <div className="form-group">
-            <select
-              name="paymentMethod"
-              value={form.paymentMethod}
-              onChange={handleChange}
-              className="form-select"
-            >
-              <option value="">Método de pago</option>
-              <option value="Efectivo">Efectivo</option>
-              <option value="Tarjeta">Tarjeta</option>
-              <option value="Nequi">Nequi</option>
-              <option value="Transferencia">Transferencia</option>
-            </select>
-          </div>
-
-          <div className="form-group">
-            <input
-              type="date"
-              name="date"
-              value={form.date}
-              onChange={handleChange}
-              className="form-input"
-            />
-          </div>
-
-          <div className="form-group">
-            <textarea
-              name="description"
-              placeholder="Descripción"
-              value={form.description}
-              onChange={handleChange}
-              className="form-textarea"
-              rows="2"
-            />
+            <textarea name="description" placeholder="Descripción" value={form.description} onChange={handleChange} className="form-textarea" rows="2" disabled={submitting} />
           </div>
 
           <div className="buttons">
-            <button type="submit" className="btn-save">
-              Guardar
-            </button>
-            <button type="button" onClick={onClose} className="btn-cancel">
-              Cancelar
-            </button>
+            <button type="submit" className="btn-save" disabled={submitting}>{submitting ? "Guardando..." : "Guardar"}</button>
+            <button type="button" onClick={onClose} className="btn-cancel" disabled={submitting}>Cancelar</button>
           </div>
         </form>
       </div>

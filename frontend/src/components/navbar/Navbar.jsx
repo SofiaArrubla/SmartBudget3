@@ -5,15 +5,14 @@ import Swal from "sweetalert2";
 import { useAuth } from "../../context/AuthContext";
 
 const Navbar = () => {
-
 const navigate = useNavigate();
-const { isAuth, logout, user } = useAuth();
+const {isAuth, logout, user} = useAuth();
 const [open, setOpen] = useState(false);
 const menuRef = useRef();
 
 useEffect(() => {
-    const handleClickOutside = (Event) => {
-        if(menuRef.current && !menuRef.current.contains(Event.target)){
+    const handleClickOutside = (e) => {
+        if(menuRef.current && !menuRef.current.contains(e.target)){
             setOpen(false);
         }
     };
@@ -26,11 +25,14 @@ useEffect(() => {
 }, []);
 
 const handleLogout = () => {
+    setOpen(false);
     Swal.fire({
     title: "¿Cerrar sesión?",
     text: "Se cerrará tu sesión actual",
     icon: "warning",
     showCancelButton: true,
+    confirmButtonColor: "#4CAF50",
+    cancelButtonColor: "#d33",
     confirmButtonText: "Sí, cerrar",
     cancelButtonText: "Cancelar"
     }).then((result) => {
@@ -68,30 +70,26 @@ return (
         )}
 
         {isAuth && (
-            <div 
-            className="nav-user" 
-            ref={menuRef}
-            >
+            <div className="nav-user" ref={menuRef}>
 
-                <div 
-                className="user-info"
+                <div className="user-info"
                 onClick={(e) => {
                     e.stopPropagation();
                     setOpen(!open);
                 }}
                 >
                     <div className="avatar">
-                        {user?.email.charAt(0).toUpperCase()}
+                        {user?.email.charAt(0).toUpperCase() || "U"}
                     </div>
 
                     <span>
-                        {user?.email?.split("@")[0]}
+                        {user?.email?.split("@")[0] || "Usuario"}
                     </span>
                 </div>
 
                 {open &&(
                     <div className="dropdown">
-                        <button onClick={() => navigate("/configuracion")}>
+                        <button onClick={() => {setOpen(false); navigate("/configuracion")}}>
                             Configuración
                         </button>
 

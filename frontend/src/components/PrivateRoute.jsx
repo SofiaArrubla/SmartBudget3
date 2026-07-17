@@ -1,16 +1,14 @@
 import { Navigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
-function PrivateRoute({ children }) {
-const { isAuth } = useAuth();
+const PrivateRoute = ({children}) => {
+  const { isAuth, loading } = useAuth();
 
-  // Si NO está autenticado → lo manda al login
-if (!isAuth) {
-    return <Navigate to="/login" />;
-}
+  if (loading) {
+    return <div className="loading-screen">Cargando aplicación...</div>;
+  }
 
-  // Si SÍ está autenticado → muestra la página
-return children;
-}
+  return isAuth ? children : <Navigate to="/login" replace />;
+};
 
 export default PrivateRoute;
